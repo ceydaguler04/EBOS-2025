@@ -24,5 +24,9 @@ namespace EBOS.Entities
         public Kullanici Kullanici { get; set; }
         public Seans Seans { get; set; }
         public Koltuk Koltuk { get; set; }
+<<<<<<< HEAD
+=======
+      
+>>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
     }
 }
