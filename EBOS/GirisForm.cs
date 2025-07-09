@@ -90,9 +90,9 @@ namespace EBOS
                 string rol = cmbRol.SelectedItem?.ToString();
 
                 if (rol == "Yönetici")
-                { 
-                    YoneticiPaneli panel = new YoneticiPaneli();
-                panel.Show();
+                {
+                    //  YoneticiPaneli panel = new YoneticiPaneli();
+                    //  panel.Show();
                 }
                 else if (rol == "Kullanıcı")
                 {
@@ -136,6 +136,12 @@ namespace EBOS
                 MessageBox.Show("Bu özellik henüz aktif değil. (Şifre sıfırlama ekranı yakında)", "Bilgi");
             };
             this.Controls.Add(linkSifreUnuttum);
+        }
+
+        // 🔽 Buraya eklemelisin:
+        private void GirisForm_Load(object sender, EventArgs e)
+        {
+            // Şu anda boş kalabilir
         }
     }
 }
