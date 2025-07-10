@@ -9,7 +9,7 @@ namespace EBOS
         public GirisForm()
         {
             InitializeComponent();
-            EkraniOlustur();
+            EkraniOlustur(); // ✅ tüm bileşenleri ve arka planı yükle
         }
 
         private void EkraniOlustur()
@@ -18,7 +18,7 @@ namespace EBOS
             this.ClientSize = new System.Drawing.Size(400, 550);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
-
+            this.BackColor = Color.FromArgb(2, 48, 151);
             // E-Posta Label
             Label lblEposta = new Label()
             {
@@ -91,12 +91,12 @@ namespace EBOS
 
                 if (rol == "Yönetici")
                 {
-                    //  YoneticiPaneli panel = new YoneticiPaneli();
-                    //  panel.Show();
+                     YoneticiPaneli panel = new YoneticiPaneli();
+                      panel.Show();
                 }
                 else if (rol == "Kullanıcı")
                 {
-                    AnaSayfaForm ana = new AnaSayfaForm(); // ✅ Senin kullanıcı sayfan
+                    KullaniciPaneli ana = new KullaniciPaneli(); // ✅ Senin kullanıcı sayfan
                     ana.Show();
                 }
                 else

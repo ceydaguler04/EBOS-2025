@@ -23,435 +23,412 @@ namespace EBOS.DataAccess.Migrations
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("EBOS.Entities.Bilet", b =>
-                {
-                    b.Property<int>("BiletID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("BiletID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BiletID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BiletID"));
 
-                    b.Property<decimal>("Fiyat")
-                        .HasColumnType("decimal(65,30)");
+                b.Property<decimal>("Fiyat")
+                    .HasColumnType("decimal(65,30)");
 
-                    b.Property<bool>("KampanyaUygulandiMi")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("KampanyaUygulandiMi")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("KoltukID")
-                        .HasColumnType("int");
+                b.Property<int>("KoltukID")
+                    .HasColumnType("int");
 
-                    b.Property<int>("KullaniciID")
-                        .HasColumnType("int");
+                b.Property<int>("KullaniciID")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("SatinAlmaTarihi")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTime>("SatinAlmaTarihi")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<int>("SeansID")
-                        .HasColumnType("int");
+                b.Property<int>("SeansID")
+                    .HasColumnType("int");
 
-                    b.HasKey("BiletID");
+                b.HasKey("BiletID");
 
-                    b.HasIndex("KoltukID");
+                b.HasIndex("KoltukID");
 
-                    b.HasIndex("KullaniciID");
+                b.HasIndex("KullaniciID");
 
-                    b.HasIndex("SeansID");
+                b.HasIndex("SeansID");
 
-                    b.ToTable("Biletler");
-                });
+                b.ToTable("Biletler");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Degerlendirme", b =>
-                {
-                    b.Property<int>("YorumID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("YorumID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("YorumID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("YorumID"));
 
-                    b.Property<int>("EtkinlikID")
-                        .HasColumnType("int");
+                b.Property<int>("EtkinlikID")
+                    .HasColumnType("int");
 
-                    b.Property<int>("KullaniciID")
-                        .HasColumnType("int");
+                b.Property<int>("KullaniciID")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Puan")
-                        .HasColumnType("int");
+                b.Property<int>("Puan")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("Tarih")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTime>("Tarih")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Yorum")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Yorum")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.HasKey("YorumID");
+                b.HasKey("YorumID");
 
-                    b.HasIndex("EtkinlikID");
+                b.HasIndex("EtkinlikID");
 
-                    b.HasIndex("KullaniciID");
+                b.HasIndex("KullaniciID");
 
-                    b.ToTable("Degerlendirmeler");
-                });
+                b.ToTable("Degerlendirmeler");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Etkinlik", b =>
-                {
-                    b.Property<int>("EtkinlikID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("EtkinlikID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("EtkinlikID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("EtkinlikID"));
 
-                    b.Property<string>("Aciklama")
-                        .IsRequired()
-<<<<<<< HEAD
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                b.Property<string>("Aciklama")
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .HasColumnType("varchar(500)");
 
-                    b.Property<string>("EtkinlikAdi")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                b.Property<string>("EtkinlikAdi")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("varchar(100)");
 
-                    b.Property<string>("GorselYolu")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-=======
-                        .HasColumnType("longtext");
+                b.Property<string>("GorselYolu")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("varchar(200)");
 
-                    b.Property<string>("EtkinlikAdi")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<int>("SureDakika")
+                    .HasColumnType("int");
 
-                    b.Property<int>("EtkinlikTuruTurID")
-                        .HasColumnType("int");
+                b.Property<int>("TurID")
+                    .HasColumnType("int");
 
-                    b.Property<string>("GorselYolu")
-                        .IsRequired()
-                        .HasColumnType("longtext");
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
+                b.HasKey("EtkinlikID");
 
-                    b.Property<int>("SureDakika")
-                        .HasColumnType("int");
+                b.HasIndex("TurID");
 
-                    b.Property<int>("TurID")
-                        .HasColumnType("int");
-
-                    b.HasKey("EtkinlikID");
-
-<<<<<<< HEAD
-                    b.HasIndex("TurID");
-=======
-                    b.HasIndex("EtkinlikTuruTurID");
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
-
-                    b.ToTable("Etkinlikler");
-                });
+                b.ToTable("Etkinlikler");
+            });
 
             modelBuilder.Entity("EBOS.Entities.EtkinlikTuru", b =>
-                {
-                    b.Property<int>("TurID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("TurID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TurID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TurID"));
 
-                    b.Property<string>("TurAdi")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("TurAdi")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.HasKey("TurID");
+                b.HasKey("TurID");
 
-                    b.ToTable("EtkinlikTurleri");
-                });
+                b.ToTable("EtkinlikTurleri");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Kampanya", b =>
-                {
-                    b.Property<int>("KampanyaID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("KampanyaID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("KampanyaID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("KampanyaID"));
 
-                    b.Property<string>("Aciklama")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Aciklama")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTime>("BaslangicTarihi")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTime>("BaslangicTarihi")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime>("BitisTarihi")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTime>("BitisTarihi")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<int>("IndirimYuzdesi")
-                        .HasColumnType("int");
+                b.Property<int>("IndirimYuzdesi")
+                    .HasColumnType("int");
 
-                    b.Property<string>("KampanyaAdi")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("KampanyaAdi")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.HasKey("KampanyaID");
+                b.HasKey("KampanyaID");
 
-                    b.ToTable("Kampanyalar");
-                });
+                b.ToTable("Kampanyalar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Koltuk", b =>
-                {
-                    b.Property<int>("KoltukID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("KoltukID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("KoltukID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("KoltukID"));
 
-                    b.Property<int>("SalonID")
-                        .HasColumnType("int");
+                b.Property<int>("SalonID")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Satir")
-                        .HasColumnType("int");
+                b.Property<int>("Satir")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Sutun")
-                        .HasColumnType("int");
+                b.Property<int>("Sutun")
+                    .HasColumnType("int");
 
-                    b.HasKey("KoltukID");
+                b.HasKey("KoltukID");
 
-                    b.HasIndex("SalonID");
+                b.HasIndex("SalonID");
 
-                    b.ToTable("Koltuklar");
-                });
+                b.ToTable("Koltuklar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Kullanici", b =>
-                {
-                    b.Property<int>("KullaniciID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("KullaniciID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("KullaniciID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("KullaniciID"));
 
-                    b.Property<string>("AdSoyad")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("AdSoyad")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("Eposta")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                b.Property<string>("Eposta")
+                    .IsRequired()
+                    .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Rol")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Rol")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("Sifre")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Sifre")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.HasKey("KullaniciID");
+                b.HasKey("KullaniciID");
 
-                    b.HasIndex("Eposta")
-                        .IsUnique();
+                b.HasIndex("Eposta")
+                    .IsUnique();
 
-                    b.ToTable("Kullanicilar");
-                });
+                b.ToTable("Kullanicilar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Rapor", b =>
-                {
-                    b.Property<int>("RaporID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("RaporID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("RaporID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("RaporID"));
 
-                    b.Property<string>("DosyaYolu")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("DosyaYolu")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTime>("OlusturmaTarihi")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTime>("OlusturmaTarihi")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("RaporAdi")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("RaporAdi")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.HasKey("RaporID");
+                b.HasKey("RaporID");
 
-                    b.ToTable("Raporlar");
-                });
+                b.ToTable("Raporlar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Salon", b =>
-                {
-                    b.Property<int>("SalonID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("SalonID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SalonID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SalonID"));
 
-                    b.Property<string>("SalonAdi")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("SalonAdi")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<int>("SatirSayisi")
-                        .HasColumnType("int");
+                b.Property<int>("SatirSayisi")
+                    .HasColumnType("int");
 
-                    b.Property<int>("SutunSayisi")
-                        .HasColumnType("int");
+                b.Property<int>("SutunSayisi")
+                    .HasColumnType("int");
 
-                    b.HasKey("SalonID");
+                b.HasKey("SalonID");
 
-                    b.ToTable("Salonlar");
-                });
+                b.ToTable("Salonlar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Seans", b =>
-                {
-                    b.Property<int>("SeansID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("SeansID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SeansID"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("SeansID"));
 
-                    b.Property<int>("EtkinlikID")
-                        .HasColumnType("int");
+                b.Property<int>("EtkinlikID")
+                    .HasColumnType("int");
 
-                    b.Property<TimeSpan>("Saat")
-                        .HasColumnType("time(6)");
+                b.Property<TimeSpan>("Saat")
+                    .HasColumnType("time(6)");
 
-                    b.Property<int>("SalonID")
-                        .HasColumnType("int");
+                b.Property<int>("SalonID")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("Tarih")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTime>("Tarih")
+                    .HasColumnType("datetime(6)");
 
-                    b.HasKey("SeansID");
+                b.HasKey("SeansID");
 
-                    b.HasIndex("EtkinlikID");
+                b.HasIndex("EtkinlikID");
 
-                    b.HasIndex("SalonID");
+                b.HasIndex("SalonID");
 
-                    b.ToTable("Seanslar");
-                });
+                b.ToTable("Seanslar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Bilet", b =>
-                {
-                    b.HasOne("EBOS.Entities.Koltuk", "Koltuk")
-                        .WithMany("Biletler")
-                        .HasForeignKey("KoltukID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("EBOS.Entities.Koltuk", "Koltuk")
+                    .WithMany("Biletler")
+                    .HasForeignKey("KoltukID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
-                        .WithMany("Biletler")
-                        .HasForeignKey("KullaniciID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
+                    .WithMany("Biletler")
+                    .HasForeignKey("KullaniciID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("EBOS.Entities.Seans", "Seans")
-                        .WithMany("Biletler")
-                        .HasForeignKey("SeansID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("EBOS.Entities.Seans", "Seans")
+                    .WithMany("Biletler")
+                    .HasForeignKey("SeansID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Koltuk");
+                b.Navigation("Koltuk");
 
-                    b.Navigation("Kullanici");
+                b.Navigation("Kullanici");
 
-                    b.Navigation("Seans");
-                });
+                b.Navigation("Seans");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Degerlendirme", b =>
-                {
-                    b.HasOne("EBOS.Entities.Etkinlik", "Etkinlik")
-                        .WithMany("Degerlendirmeler")
-                        .HasForeignKey("EtkinlikID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("EBOS.Entities.Etkinlik", "Etkinlik")
+                    .WithMany("Degerlendirmeler")
+                    .HasForeignKey("EtkinlikID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
-                        .WithMany("Degerlendirmeler")
-                        .HasForeignKey("KullaniciID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
+                    .WithMany("Degerlendirmeler")
+                    .HasForeignKey("KullaniciID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Etkinlik");
+                b.Navigation("Etkinlik");
 
-                    b.Navigation("Kullanici");
-                });
+                b.Navigation("Kullanici");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Etkinlik", b =>
-                {
-                    b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
-                        .WithMany("Etkinlikler")
-<<<<<<< HEAD
-                        .HasForeignKey("TurID")
-=======
-                        .HasForeignKey("EtkinlikTuruTurID")
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
+                    .WithMany("Etkinlikler")
+                    .HasForeignKey("TurID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("EtkinlikTuru");
-                });
+                b.Navigation("EtkinlikTuru");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Koltuk", b =>
-                {
-                    b.HasOne("EBOS.Entities.Salon", "Salon")
-                        .WithMany("Koltuklar")
-                        .HasForeignKey("SalonID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("EBOS.Entities.Salon", "Salon")
+                    .WithMany("Koltuklar")
+                    .HasForeignKey("SalonID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Salon");
-                });
+                b.Navigation("Salon");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Seans", b =>
-                {
-                    b.HasOne("EBOS.Entities.Etkinlik", "Etkinlik")
-                        .WithMany("Seanslar")
-                        .HasForeignKey("EtkinlikID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("EBOS.Entities.Etkinlik", "Etkinlik")
+                    .WithMany("Seanslar")
+                    .HasForeignKey("EtkinlikID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("EBOS.Entities.Salon", "Salon")
-                        .WithMany("Seanslar")
-                        .HasForeignKey("SalonID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("EBOS.Entities.Salon", "Salon")
+                    .WithMany("Seanslar")
+                    .HasForeignKey("SalonID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Etkinlik");
+                b.Navigation("Etkinlik");
 
-                    b.Navigation("Salon");
-                });
+                b.Navigation("Salon");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Etkinlik", b =>
-                {
-                    b.Navigation("Degerlendirmeler");
+            {
+                b.Navigation("Degerlendirmeler");
 
-                    b.Navigation("Seanslar");
-                });
+                b.Navigation("Seanslar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.EtkinlikTuru", b =>
-                {
-                    b.Navigation("Etkinlikler");
-                });
+            {
+                b.Navigation("Etkinlikler");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Koltuk", b =>
-                {
-                    b.Navigation("Biletler");
-                });
+            {
+                b.Navigation("Biletler");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Kullanici", b =>
-                {
-                    b.Navigation("Biletler");
+            {
+                b.Navigation("Biletler");
 
-                    b.Navigation("Degerlendirmeler");
-                });
+                b.Navigation("Degerlendirmeler");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Salon", b =>
-                {
-                    b.Navigation("Koltuklar");
+            {
+                b.Navigation("Koltuklar");
 
-                    b.Navigation("Seanslar");
-                });
+                b.Navigation("Seanslar");
+            });
 
             modelBuilder.Entity("EBOS.Entities.Seans", b =>
-                {
-                    b.Navigation("Biletler");
-                });
+            {
+                b.Navigation("Biletler");
+            });
 #pragma warning restore 612, 618
         }
     }
