@@ -4,11 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-<<<<<<< HEAD
-=======
-using System.Collections.Generic;
-
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
 namespace EBOS.Entities
 {
     public class Salon

@@ -15,10 +15,10 @@ namespace EBOS
         private void EkraniOlustur()
         {
             this.Text = "Giriş Yap";
-            this.ClientSize = new System.Drawing.Size(400, 550);
+            this.ClientSize = new Size(400, 550);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
-
+            this.BackColor = Color.FromArgb(2, 48, 151);
             // E-Posta Label
             Label lblEposta = new Label()
             {
@@ -28,7 +28,6 @@ namespace EBOS
             };
             this.Controls.Add(lblEposta);
 
-            // E-Posta TextBox
             Guna2TextBox txtEposta = new Guna2TextBox()
             {
                 Name = "txtEposta",
@@ -38,7 +37,6 @@ namespace EBOS
             };
             this.Controls.Add(txtEposta);
 
-            // Şifre Label
             Label lblSifre = new Label()
             {
                 Text = "Şifre:",
@@ -47,7 +45,6 @@ namespace EBOS
             };
             this.Controls.Add(lblSifre);
 
-            // Şifre TextBox
             Guna2TextBox txtSifre = new Guna2TextBox()
             {
                 Name = "txtSifre",
@@ -58,7 +55,6 @@ namespace EBOS
             };
             this.Controls.Add(txtSifre);
 
-            // Rol Label
             Label lblRol = new Label()
             {
                 Text = "Rol:",
@@ -67,23 +63,21 @@ namespace EBOS
             };
             this.Controls.Add(lblRol);
 
-            // Rol ComboBox
             Guna2ComboBox cmbRol = new Guna2ComboBox()
             {
                 Name = "cmbRol",
-                Location = new System.Drawing.Point(50, 290),
-                Size = new System.Drawing.Size(300, 40),
+                Location = new Point(50, 290),
+                Size = new Size(300, 40),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici" });
             this.Controls.Add(cmbRol);
 
-            // Giriş Butonu
             Guna2Button btnGiris = new Guna2Button()
             {
                 Text = "Giriş Yap",
-                Location = new System.Drawing.Point(50, 350),
-                Size = new System.Drawing.Size(300, 45)
+                Location = new Point(50, 350),
+                Size = new Size(300, 45)
             };
             btnGiris.Click += (s, e) =>
             {
@@ -91,12 +85,12 @@ namespace EBOS
 
                 if (rol == "Yönetici")
                 {
-                    //  YoneticiPaneli panel = new YoneticiPaneli();
-                    //  panel.Show();
+                     YoneticiPaneli panel = new YoneticiPaneli();
+                      panel.Show();
                 }
                 else if (rol == "Kullanıcı")
                 {
-                    AnaSayfaForm ana = new AnaSayfaForm(); // ✅ Senin kullanıcı sayfan
+                    KullaniciPaneli ana = new KullaniciPaneli(adSoyad);
                     ana.Show();
                 }
                 else
@@ -109,7 +103,6 @@ namespace EBOS
             };
             this.Controls.Add(btnGiris);
 
-            // Kayıt Ol Linki
             LinkLabel linkKayit = new LinkLabel()
             {
                 Text = "Hesabınız yok mu? Kayıt Ol",
@@ -124,7 +117,6 @@ namespace EBOS
             };
             this.Controls.Add(linkKayit);
 
-            // Şifremi Unuttum Linki
             LinkLabel linkSifreUnuttum = new LinkLabel()
             {
                 Text = "Şifremi unuttum",
@@ -138,7 +130,6 @@ namespace EBOS
             this.Controls.Add(linkSifreUnuttum);
         }
 
-        // 🔽 Buraya eklemelisin:
         private void GirisForm_Load(object sender, EventArgs e)
         {
             // Şu anda boş kalabilir
