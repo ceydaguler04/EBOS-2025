@@ -3,7 +3,7 @@ using Guna.UI2.WinForms;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using static Guna.UI2.WinForms.Suite.Descriptions;
+using FontAwesome.Sharp;
 
 namespace EBOS
 {
@@ -159,7 +159,8 @@ namespace EBOS
                 Location = konum,
                 BackColor = renk,
                 ForeColor = Color.White,
-                TextAlign = ContentAlignment.MiddleCenter
+                Location = new Point(55, 38),
+                AutoSize = true
             };
         }
         private void YoneticiPaneli_Load(object sender, EventArgs e)
