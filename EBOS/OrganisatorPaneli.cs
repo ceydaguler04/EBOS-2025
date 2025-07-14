@@ -1,35 +1,31 @@
-using Guna.UI2.WinForms;
+ï»¿using Guna.UI2.WinForms;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
 using FontAwesome.Sharp;
-using EBOS;
 
 namespace EBOS
 {
-    public partial class YoneticiPaneli : Form
+    public partial class OrganisatorPaneli : Form
     {
         private Guna2Panel topPanel;
         private Label lblBaslik;
         private Label lblKullaniciAd;
         private Guna2Panel leftMenu;
-
         private IconButton btnDashboard;
         private IconButton btnEtkinlikler;
         private IconButton btnSeanslar;
-        private IconButton btnKampanyalar;
-        private IconButton btnKullanicilar;
+        private IconButton btnBiletler;
         private IconButton btnAyarlar;
-
         private IconButton aktifButon = null;
         private Panel mainContentPanel;
 
         public static string AktifTema = "Yesil";
 
-        public YoneticiPaneli()
+        public OrganisatorPaneli(string kullaniciAdi = "OrganizatÃ¶r")
         {
             InitializeComponent();
-            this.Text = "Yönetici Paneli";
+            this.Text = "OrganizatÃ¶r Paneli";
             this.Size = new Size(1100, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -47,7 +43,7 @@ namespace EBOS
 
             lblBaslik = new Label()
             {
-                Text = "Yönetici Paneli",
+                Text = "OrganizatÃ¶r Paneli",
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
@@ -58,7 +54,7 @@ namespace EBOS
 
             lblKullaniciAd = new Label()
             {
-                Text = "Ceyda Güler",
+                Text = kullaniciAdi,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
@@ -78,7 +74,7 @@ namespace EBOS
                 Renderer = new CustomColorRenderer()
             };
 
-            ToolStripMenuItem cikisItem = new ToolStripMenuItem("Çýkýþ Yap");
+            ToolStripMenuItem cikisItem = new ToolStripMenuItem("Ã‡Ä±kÄ±ÅŸ Yap");
             cikisItem.Click += (s, e) => this.Close();
             contextMenu.Items.Add(cikisItem);
 
@@ -107,8 +103,7 @@ namespace EBOS
                 dashboard.Dock = DockStyle.Fill;
                 mainContentPanel.Controls.Add(dashboard);
             };
-
-            btnEtkinlikler = MenuIconButton("Etkinlikler", IconChar.CalendarAlt, 90);
+            btnEtkinlikler = MenuIconButton("Etkinliklerim", IconChar.CalendarAlt, 90);
             btnEtkinlikler.Click += (s, e) =>
             {
                 SetActiveButton(btnEtkinlikler);
@@ -117,42 +112,23 @@ namespace EBOS
                 etkinliklerKontrol.Dock = DockStyle.Fill;
                 mainContentPanel.Controls.Add(etkinliklerKontrol);
             };
-
-            btnKampanyalar = MenuIconButton("Kampanyalar", IconChar.Tags, 140);
-            btnKampanyalar.Click += (s, e) =>
-            {
-                SetActiveButton(btnKampanyalar);
-                mainContentPanel.Controls.Clear();
-                KampanyalarKontrol kampanyaSayfasi = new KampanyalarKontrol();
-                kampanyaSayfasi.Dock = DockStyle.Fill;
-                mainContentPanel.Controls.Add(kampanyaSayfasi);
-            };
-
-            btnKullanicilar = MenuIconButton("Kullanýcýlar", IconChar.Users, 190);
-            btnKullanicilar.Click += (s, e) =>
-            {
-                SetActiveButton(btnKullanicilar);
-                mainContentPanel.Controls.Clear();
-                KullanicilarKontrol kontrol = new KullanicilarKontrol();
-                mainContentPanel.Controls.Add(kontrol);
-            };
-
+            btnSeanslar = MenuIconButton("SeanslarÄ±m", IconChar.Clock, 140);
+            btnBiletler = MenuIconButton("Biletlerim", IconChar.TicketAlt, 190);
             btnAyarlar = MenuIconButton("Ayarlar", IconChar.Cogs, 240);
             btnAyarlar.Click += (s, e) =>
             {
                 SetActiveButton(btnAyarlar);
                 mainContentPanel.Controls.Clear();
-                AyarlarKontroll kontrol = new AyarlarKontroll("ceyda@example.com");
-                mainContentPanel.Controls.Add(kontrol);
+                var ayarlar = new AyarlarKontroll(("ceyda@example.com"));
+                mainContentPanel.Controls.Add(ayarlar);
             };
+
 
             leftMenu.Controls.AddRange(new Control[]
             {
                 btnDashboard, btnEtkinlikler, btnSeanslar,
-                btnKampanyalar, btnKullanicilar, btnAyarlar
+                btnBiletler, btnAyarlar
             });
-
-            SetActiveButton(btnDashboard);
 
             mainContentPanel = new Panel()
             {
@@ -162,7 +138,26 @@ namespace EBOS
             };
             this.Controls.Add(mainContentPanel);
 
-            this.Load += YoneticiPaneli_Load;
+            //btnDashboard.Click += (s, e) =>
+            //{
+            //    SetActiveButton(btnDashboard);
+            //    mainContentPanel.Controls.Clear();
+            //    Label lbl = new Label();
+            //    lbl.Text = "Dashboard (OrganizatÃ¶r)";
+            //    lbl.Font = new Font("Segoe UI", 20, FontStyle.Bold);
+            //    lbl.Dock = DockStyle.Fill;
+            //    lbl.TextAlign = ContentAlignment.MiddleCenter;
+            //    mainContentPanel.Controls.Add(lbl);
+            //};
+
+            this.Load += OrganisatorPaneli_Load;
+        }
+
+        private void OrganisatorPaneli_Load(object sender, EventArgs e)
+        {
+            ApplyTheme();
+            SetActiveButton(btnDashboard);
+            btnDashboard.PerformClick();
         }
 
         private IconButton MenuIconButton(string text, IconChar icon, int top)
@@ -185,7 +180,6 @@ namespace EBOS
 
             btn.FlatAppearance.BorderSize = 0;
             btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(90, 130, 45);
-
             btn.Click += (s, e) => SetActiveButton(btn);
             return btn;
         }
@@ -199,16 +193,6 @@ namespace EBOS
 
             buton.BackColor = Color.FromArgb(90, 130, 45);
             aktifButon = buton;
-        }
-
-        private void YoneticiPaneli_Load(object sender, EventArgs e)
-        {
-            ApplyTheme();
-            SetActiveButton(btnDashboard);
-            mainContentPanel.Controls.Clear();
-            DashboardKontrol dashboard = new DashboardKontrol();
-            dashboard.Dock = DockStyle.Fill;
-            mainContentPanel.Controls.Add(dashboard);
         }
 
         public void ApplyTheme()
@@ -227,12 +211,10 @@ namespace EBOS
             }
             else if (AktifTema == "Koyu")
             {
-                this.BackColor = Color.FromArgb(120,120,120);
+                this.BackColor = Color.FromArgb(120, 120, 120);
                 leftMenu.FillColor = Color.FromArgb(50, 50, 50);
                 topPanel.FillColor = Color.FromArgb(50, 50, 50);
             }
         }
     }
-
-
 }

@@ -28,6 +28,10 @@ namespace EBOS.Entities
 
         [Range(1, 500)]
         public int SureDakika { get; set; } // Süre (dakika cinsinden)
+        public int KullaniciID { get; set; }
+
+        [ForeignKey("KullaniciID")]
+        public Kullanici Kullanici { get; set; }
 
         // Navigation Properties
         public ICollection<Seans> Seanslar { get; set; } // 1 Etkinlik → Çok Seans

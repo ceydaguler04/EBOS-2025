@@ -25,6 +25,7 @@ namespace EBOS.Entities
         // İlişkiler
         public ICollection<Bilet> Biletler { get; set; }
         public ICollection<Degerlendirme> Degerlendirmeler { get; set; }
+        public ICollection<Etkinlik> Etkinlikler { get; set; }
     }
 }
 
