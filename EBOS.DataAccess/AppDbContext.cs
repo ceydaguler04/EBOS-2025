@@ -19,12 +19,7 @@ namespace EBOS.DataAccess
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Buraya MySQL bağlantı cümleni yazacaksın
-            optionsBuilder.UseMySql(
-<<<<<<< HEAD
-                "server=localhost;database=EBOSDB;user=root;password=16012004;",
-=======
-                "server=localhost;database=EBOSDB;user=root;password=Sibel8181.;",
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
+            optionsBuilder.UseMySql("server=localhost;database=EBOSDB;user=root;password=16012004;",
                 new MySqlServerVersion(new Version(8, 0, 36))
             );
         }
