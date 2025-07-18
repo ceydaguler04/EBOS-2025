@@ -9,6 +9,7 @@ namespace EBOS.Entities
     public class Koltuk
     {
         public int KoltukID { get; set; }
+        public string KoltukNo { get; set; }
         public int SalonID { get; set; }
         public int Satir { get; set; }  // Örnek: 1, 2, 3...
         public int Sutun { get; set; }  // Örnek: 1, 2, 3...

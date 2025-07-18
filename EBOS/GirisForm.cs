@@ -1,138 +1,185 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 using Guna.UI2.WinForms;
+using EBOS.DataAccess;
 
 namespace EBOS
 {
     public partial class GirisForm : Form
     {
+        private Guna2TextBox txtEposta, txtSifre;
+        private Guna2Button btnGiris;
+        private LinkLabel linkKayit, linkSifreUnuttum;
+        private Guna2Panel kartPanel;
+
         public GirisForm()
         {
             InitializeComponent();
-            EkraniOlustur();
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.ClientSize = new Size(430, 600);
+            this.BackColor = Color.White;
+            this.Opacity = 0;
+            this.Load += FadeIn;
+
+            ArayuzOlustur();
         }
 
-        private void EkraniOlustur()
+        private void FadeIn(object sender, EventArgs e)
         {
-            this.Text = "Giriş Yap";
-            this.ClientSize = new Size(400, 550);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.BackColor = Color.FromArgb(2, 48, 151);
-            // E-Posta Label
-            Label lblEposta = new Label()
-            {
-                Text = "E-Posta:",
-                Location = new System.Drawing.Point(50, 80),
-                AutoSize = true
-            };
-            this.Controls.Add(lblEposta);
+            System.Windows.Forms.Timer fadeTimer = new System.Windows.Forms.Timer();
 
-            Guna2TextBox txtEposta = new Guna2TextBox()
+            fadeTimer.Interval = 10;
+            fadeTimer.Tick += (s, ev) =>
             {
-                Name = "txtEposta",
-                PlaceholderText = "E-posta adresinizi girin",
-                Location = new System.Drawing.Point(50, 110),
-                Size = new System.Drawing.Size(300, 40)
+                if (this.Opacity < 1)
+                    this.Opacity += 0.05;
+                else
+                    fadeTimer.Stop();
             };
-            this.Controls.Add(txtEposta);
+            fadeTimer.Start();
+        }
 
-            Label lblSifre = new Label()
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            using (LinearGradientBrush brush = new LinearGradientBrush(this.ClientRectangle,
+                Color.FromArgb(90, 115, 47), Color.FromArgb(60, 80, 30), 45f))
             {
-                Text = "Şifre:",
-                Location = new System.Drawing.Point(50, 170),
-                AutoSize = true
+                e.Graphics.FillRectangle(brush, this.ClientRectangle);
+            }
+        }
+
+        private void ArayuzOlustur()
+        {
+            // Kart Panel
+            kartPanel = new Guna2Panel()
+            {
+                Size = new Size(360, 430),
+                Location = new Point((this.Width - 360) / 2, 80),
+                BorderRadius = 20,
+                FillColor = Color.White,
+                ShadowDecoration = { Enabled = true, Depth = 10, BorderRadius = 20 }
             };
-            this.Controls.Add(lblSifre);
+            this.Controls.Add(kartPanel);
 
-            Guna2TextBox txtSifre = new Guna2TextBox()
+            // Başlık
+            Label lblBaslik = new Label()
             {
-                Name = "txtSifre",
-                PlaceholderText = "Şifrenizi girin",
+                Text = "EBOS GİRİŞ",
+                Font = new Font("Segoe UI", 18, FontStyle.Bold),
+                ForeColor = Color.FromArgb(90, 115, 47),
+                AutoSize = true,
+                Location = new Point((kartPanel.Width - 180) / 2, 25)
+            };
+            kartPanel.Controls.Add(lblBaslik);
+
+            // E-posta
+            txtEposta = new Guna2TextBox()
+            {
+                PlaceholderText = "E-posta",
+                Size = new Size(280, 40),
+                Location = new Point(40, 90),
+                BorderRadius = 8
+            };
+            kartPanel.Controls.Add(txtEposta);
+
+            // Şifre
+            txtSifre = new Guna2TextBox()
+            {
+                PlaceholderText = "Şifre",
                 PasswordChar = '*',
-                Location = new System.Drawing.Point(50, 200),
-                Size = new System.Drawing.Size(300, 40)
+                Size = new Size(280, 40),
+                Location = new Point(40, 150),
+                BorderRadius = 8
             };
-            this.Controls.Add(txtSifre);
+            kartPanel.Controls.Add(txtSifre);
 
-            Label lblRol = new Label()
-            {
-                Text = "Rol:",
-                Location = new System.Drawing.Point(50, 260),
-                AutoSize = true
-            };
-            this.Controls.Add(lblRol);
-
-            Guna2ComboBox cmbRol = new Guna2ComboBox()
-            {
-                Name = "cmbRol",
-                Location = new Point(50, 290),
-                Size = new Size(300, 40),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici" });
-            this.Controls.Add(cmbRol);
-
-            Guna2Button btnGiris = new Guna2Button()
+            // Giriş Butonu
+            btnGiris = new Guna2Button()
             {
                 Text = "Giriş Yap",
-                Location = new Point(50, 350),
-                Size = new Size(300, 45)
+                Size = new Size(280, 45),
+                Location = new Point(40, 210),
+                BorderRadius = 10,
+                FillColor = Color.FromArgb(90, 115, 47),
+                HoverState = { FillColor = Color.FromArgb(70, 100, 40) }
             };
-            btnGiris.Click += (s, e) =>
-            {
-                string rol = cmbRol.SelectedItem?.ToString();
+            btnGiris.Click += BtnGiris_Click;
+            kartPanel.Controls.Add(btnGiris);
 
-                if (rol == "Yönetici")
+            // Kayıt Ol
+            linkKayit = new LinkLabel()
+            {
+                Text = "Hesabınız yok mu? Kayıt Ol",
+                LinkColor = Color.FromArgb(90, 115, 47),
+                ActiveLinkColor = Color.FromArgb(60, 80, 30),
+                Location = new Point(40, 275),
+                AutoSize = true
+            };
+            linkKayit.Click += (s, e) => { new KayitForm().Show(); this.Hide(); };
+            kartPanel.Controls.Add(linkKayit);
+
+            // Şifremi unuttum
+            linkSifreUnuttum = new LinkLabel()
+            {
+                Text = "Şifremi unuttum",
+                LinkColor = Color.FromArgb(120, 40, 40),
+                ActiveLinkColor = Color.DarkRed,
+                Location = new Point(40, 300),
+                AutoSize = true
+            };
+            linkSifreUnuttum.Click += (s, e) => { new SifreSifirlamaForm().Show(); this.Hide(); };
+            kartPanel.Controls.Add(linkSifreUnuttum);
+        }
+
+        private void BtnGiris_Click(object sender, EventArgs e)
+        {
+            string eposta = txtEposta.Text.Trim();
+            string sifre = txtSifre.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(eposta) || string.IsNullOrWhiteSpace(sifre))
+            {
+                MessageBox.Show("Lütfen e-posta ve şifre giriniz.", "Uyarı");
+                return;
+            }
+
+            using (var db = new AppDbContext())
+            {
+                var kullanici = db.Kullanicilar.FirstOrDefault(k => k.Eposta.ToLower() == eposta.ToLower());
+
+                if (kullanici == null)
                 {
-                     YoneticiPaneli panel = new YoneticiPaneli();
-                      panel.Show();
+                    MessageBox.Show("Kullanıcı bulunamadı.", "Hata");
+                    return;
                 }
-                else if (rol == "Kullanıcı")
+
+                if (kullanici.Sifre != sifre)
                 {
-                    KullaniciPaneli ana = new KullaniciPaneli(adSoyad);
-                    ana.Show();
+                    MessageBox.Show("Şifre hatalı.", "Hata");
+                    return;
+                }
+
+                string rol = kullanici.Rol?.ToLowerInvariant();
+
+                if (rol == "yonetici")
+                {
+                    new YoneticiPaneli().Show();
+                }
+                else if (rol == "kullanici" || rol == "kullanıcı")
+                {
+                    new KullaniciPaneli(kullanici.Eposta).Show();
                 }
                 else
                 {
-                    MessageBox.Show("Lütfen bir rol seçin.", "Uyarı");
+                    MessageBox.Show("Tanımlı olmayan bir rol: " + rol, "Hata");
                     return;
                 }
 
                 this.Hide();
-            };
-            this.Controls.Add(btnGiris);
-
-            LinkLabel linkKayit = new LinkLabel()
-            {
-                Text = "Hesabınız yok mu? Kayıt Ol",
-                Location = new System.Drawing.Point(50, 410),
-                AutoSize = true
-            };
-            linkKayit.Click += (s, e) =>
-            {
-                KayitForm kayit = new KayitForm();
-                kayit.Show();
-                this.Hide();
-            };
-            this.Controls.Add(linkKayit);
-
-            LinkLabel linkSifreUnuttum = new LinkLabel()
-            {
-                Text = "Şifremi unuttum",
-                Location = new System.Drawing.Point(50, 440),
-                AutoSize = true
-            };
-            linkSifreUnuttum.Click += (s, e) =>
-            {
-                MessageBox.Show("Bu özellik henüz aktif değil. (Şifre sıfırlama ekranı yakında)", "Bilgi");
-            };
-            this.Controls.Add(linkSifreUnuttum);
-        }
-
-        private void GirisForm_Load(object sender, EventArgs e)
-        {
-            // Şu anda boş kalabilir
+            }
         }
     }
 }

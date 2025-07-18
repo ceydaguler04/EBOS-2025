@@ -5,11 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
-using System;
-
-using System;
-using System.ComponentModel.DataAnnotations;
-
 namespace EBOS.Entities
 {
     public class Degerlendirme

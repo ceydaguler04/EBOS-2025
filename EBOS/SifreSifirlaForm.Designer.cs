@@ -1,22 +1,28 @@
 ﻿namespace EBOS
 {
-    partial class SifreSifirlaForm
+    partial class SifreSifirlamaForm
     {
-        private System.ComponentModel.IContainer components = null;
-
+        /// <summary>
+        /// Gereken tasarım bileşenlerini temizler.
+        /// </summary>
+        /// <param name="disposing">yönetilen kaynaklar atılsın mı?</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
+            {
                 components.Dispose();
+            }
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Visual Studio Designer tarafından kullanılır. Şu an boş.
+        /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "SifreSifirlaForm";
+            // Artık tamamen boş - elle tasarım kullanılmadığı için.
         }
+
+        private System.ComponentModel.IContainer components = null;
     }
 }
