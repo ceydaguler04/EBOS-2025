@@ -75,7 +75,7 @@ namespace EBOS
                 Size = new System.Drawing.Size(300, 40),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici" });
+            cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici", "Organizatör" });
             this.Controls.Add(cmbRol);
 
             // Giriş Butonu
@@ -91,13 +91,18 @@ namespace EBOS
 
                 if (rol == "Yönetici")
                 {
-                    //  YoneticiPaneli panel = new YoneticiPaneli();
-                    //  panel.Show();
+                    YoneticiPaneli panel = new YoneticiPaneli();
+                    panel.Show();
                 }
                 else if (rol == "Kullanıcı")
                 {
-                    AnaSayfaForm ana = new AnaSayfaForm(); // ✅ Senin kullanıcı sayfan
+                    AnaSayfaForm ana = new AnaSayfaForm();
                     ana.Show();
+                }
+                else if (rol == "Organizatör")
+                {
+                    OrganisatorPaneli org = new OrganisatorPaneli();
+                    org.Show();
                 }
                 else
                 {
@@ -138,7 +143,6 @@ namespace EBOS
             this.Controls.Add(linkSifreUnuttum);
         }
 
-        // 🔽 Buraya eklemelisin:
         private void GirisForm_Load(object sender, EventArgs e)
         {
             // Şu anda boş kalabilir

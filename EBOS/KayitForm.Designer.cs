@@ -28,16 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            SuspendLayout();
             // 
             // KayitForm
             // 
-            this.AutoScaleDimensions = new SizeF(7F, 15F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(800, 450);
-            this.Name = "KayitForm";
-            this.Text = "KayitForm";
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(914, 600);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "KayitForm";
+            Text = "KayitForm";
+            Load += KayitForm_Load_1;
+            ResumeLayout(false);
         }
 
 

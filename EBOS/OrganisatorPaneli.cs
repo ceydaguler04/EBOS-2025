@@ -3,6 +3,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using FontAwesome.Sharp;
+using EBOS;
 
 namespace EBOS
 {
@@ -19,8 +20,7 @@ namespace EBOS
         private IconButton btnAyarlar;
         private IconButton aktifButon = null;
         private Panel mainContentPanel;
-
-        public static string AktifTema = "Yesil";
+        private ContextMenuStrip contextMenu;
 
         public OrganisatorPaneli(string kullaniciAdi = "Organizatör")
         {
@@ -65,7 +65,7 @@ namespace EBOS
             lblKullaniciAd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             topPanel.Controls.Add(lblKullaniciAd);
 
-            ContextMenuStrip contextMenu = new ContextMenuStrip
+            contextMenu = new ContextMenuStrip
             {
                 BackColor = Color.FromArgb(90, 115, 70),
                 ForeColor = Color.White,
@@ -75,8 +75,14 @@ namespace EBOS
             };
 
             ToolStripMenuItem cikisItem = new ToolStripMenuItem("Çıkış Yap");
-            cikisItem.Click += (s, e) => this.Close();
+            cikisItem.Click += (s, e) =>
+            {
+                GirisForm giris = new GirisForm();
+                giris.Show();
+                this.Close();
+            };
             contextMenu.Items.Add(cikisItem);
+            TemaYonetici.ContextMenuRenkleriUygula(contextMenu);
 
             lblKullaniciAd.MouseDown += (s, e) =>
             {
@@ -103,6 +109,7 @@ namespace EBOS
                 dashboard.Dock = DockStyle.Fill;
                 mainContentPanel.Controls.Add(dashboard);
             };
+
             btnEtkinlikler = MenuIconButton("Etkinliklerim", IconChar.CalendarAlt, 90);
             btnEtkinlikler.Click += (s, e) =>
             {
@@ -112,22 +119,28 @@ namespace EBOS
                 etkinliklerKontrol.Dock = DockStyle.Fill;
                 mainContentPanel.Controls.Add(etkinliklerKontrol);
             };
+
             btnSeanslar = MenuIconButton("Seanslarım", IconChar.Clock, 140);
-            btnBiletler = MenuIconButton("Biletlerim", IconChar.TicketAlt, 190);
-            btnAyarlar = MenuIconButton("Ayarlar", IconChar.Cogs, 240);
+            btnSeanslar.Click += (s, e) =>
+            {
+                SetActiveButton(btnSeanslar);
+                mainContentPanel.Controls.Clear();
+                SeanslarimKontrol seanslarKontrol = new SeanslarimKontrol();
+                mainContentPanel.Controls.Add(seanslarKontrol);
+            };
+
+
+            btnAyarlar = MenuIconButton("Ayarlar", IconChar.Cogs, 190);
             btnAyarlar.Click += (s, e) =>
             {
                 SetActiveButton(btnAyarlar);
                 mainContentPanel.Controls.Clear();
-                var ayarlar = new AyarlarKontroll(("ceyda@example.com"));
+                AyarlarKontroll ayarlar = new AyarlarKontroll("ceyda@example.com");
                 mainContentPanel.Controls.Add(ayarlar);
             };
 
-
-            leftMenu.Controls.AddRange(new Control[]
-            {
-                btnDashboard, btnEtkinlikler, btnSeanslar,
-                btnBiletler, btnAyarlar
+            leftMenu.Controls.AddRange(new Control[] {
+                btnDashboard, btnEtkinlikler, btnSeanslar, btnAyarlar
             });
 
             mainContentPanel = new Panel()
@@ -137,18 +150,6 @@ namespace EBOS
                 BackColor = Color.WhiteSmoke
             };
             this.Controls.Add(mainContentPanel);
-
-            //btnDashboard.Click += (s, e) =>
-            //{
-            //    SetActiveButton(btnDashboard);
-            //    mainContentPanel.Controls.Clear();
-            //    Label lbl = new Label();
-            //    lbl.Text = "Dashboard (Organizatör)";
-            //    lbl.Font = new Font("Segoe UI", 20, FontStyle.Bold);
-            //    lbl.Dock = DockStyle.Fill;
-            //    lbl.TextAlign = ContentAlignment.MiddleCenter;
-            //    mainContentPanel.Controls.Add(lbl);
-            //};
 
             this.Load += OrganisatorPaneli_Load;
         }
@@ -179,42 +180,66 @@ namespace EBOS
             };
 
             btn.FlatAppearance.BorderSize = 0;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(90, 130, 45);
+            btn.FlatAppearance.MouseOverBackColor = TemaYonetici.HoverRenk();
             btn.Click += (s, e) => SetActiveButton(btn);
             return btn;
         }
 
-        private void SetActiveButton(IconButton buton)
+        private void SetActiveButton(IconButton yeniButon)
         {
             if (aktifButon != null)
             {
+                // Önceki aktif butonun rengini sıfırla
                 aktifButon.BackColor = Color.Transparent;
+                aktifButon.ForeColor = Color.White;
+                aktifButon.IconColor = Color.White;
             }
 
-            buton.BackColor = Color.FromArgb(90, 130, 45);
-            aktifButon = buton;
+            aktifButon = yeniButon;
+
+            // TemaYonetici'den renk al
+            Color seciliRenk = TemaYonetici.SeciliButonRengi();
+
+            aktifButon.BackColor = seciliRenk;
+            aktifButon.ForeColor = Color.White;
+            aktifButon.IconColor = Color.White;
         }
+
 
         public void ApplyTheme()
         {
-            if (AktifTema == "Yesil")
+            if (TemaYonetici.AktifTema == "Yesil")
             {
                 this.BackColor = Color.FromArgb(255, 255, 255);
                 leftMenu.FillColor = Color.FromArgb(90, 115, 47);
                 topPanel.FillColor = Color.FromArgb(90, 115, 47);
             }
-            else if (AktifTema == "Lacivert")
+            else if (TemaYonetici.AktifTema == "Lacivert")
             {
                 this.BackColor = Color.FromArgb(255, 255, 255);
                 leftMenu.FillColor = Color.FromArgb(40, 55, 120);
                 topPanel.FillColor = Color.FromArgb(40, 55, 120);
             }
-            else if (AktifTema == "Koyu")
+            else if (TemaYonetici.AktifTema == "Koyu")
             {
                 this.BackColor = Color.FromArgb(120, 120, 120);
                 leftMenu.FillColor = Color.FromArgb(50, 50, 50);
                 topPanel.FillColor = Color.FromArgb(50, 50, 50);
             }
+            foreach (Control control in leftMenu.Controls)
+            {
+                if (control is IconButton btn)
+                {
+                    btn.FlatAppearance.MouseOverBackColor = TemaYonetici.HoverRenk();
+                }
+            }
+            if (aktifButon != null)
+            {
+                aktifButon.BackColor = TemaYonetici.SeciliButonRengi();
+            }
+            TemaYonetici.ContextMenuRenkleriUygula(contextMenu);
+            
+            leftMenu.Refresh();
         }
     }
 }

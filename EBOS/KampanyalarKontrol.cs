@@ -117,7 +117,7 @@ namespace EBOS
         }
         private void KampanyalarKontrol_Load(object sender, EventArgs e)
         {
-            if (YoneticiPaneli.AktifTema == "Koyu")
+            if (TemaYonetici.AktifTema == "Koyu")
             {
                 this.BackColor = Color.FromArgb(120, 120, 120); 
             }

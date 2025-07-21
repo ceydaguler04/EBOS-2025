@@ -102,7 +102,7 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<string>("Aciklama")
                         .IsRequired()
-<<<<<<< HEAD
+
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
@@ -115,8 +115,6 @@ namespace EBOS.DataAccess.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
-=======
-                        .HasColumnType("longtext");
 
                     b.Property<string>("EtkinlikAdi")
                         .IsRequired()
@@ -128,7 +126,6 @@ namespace EBOS.DataAccess.Migrations
                     b.Property<string>("GorselYolu")
                         .IsRequired()
                         .HasColumnType("longtext");
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
 
                     b.Property<int>("SureDakika")
                         .HasColumnType("int");
@@ -138,11 +135,10 @@ namespace EBOS.DataAccess.Migrations
 
                     b.HasKey("EtkinlikID");
 
-<<<<<<< HEAD
+
                     b.HasIndex("TurID");
-=======
+
                     b.HasIndex("EtkinlikTuruTurID");
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
 
                     b.ToTable("Etkinlikler");
                 });
@@ -376,11 +372,11 @@ namespace EBOS.DataAccess.Migrations
                 {
                     b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
                         .WithMany("Etkinlikler")
-<<<<<<< HEAD
+
                         .HasForeignKey("TurID")
-=======
+
                         .HasForeignKey("EtkinlikTuruTurID")
->>>>>>> ba5605a (GirisForm ve KayitForm kodla tasarlandı)
+
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -39,6 +39,7 @@ namespace EBOS
                 Font = new Font("Segoe UI", 14, FontStyle.Bold),
                 Location = new Point(30, 150),
                 ForeColor = Color.DimGray,
+                BackColor = Color.White,
                 AutoSize = true
             };
             this.Controls.Add(lblGrafikBaslik);
@@ -109,7 +110,7 @@ namespace EBOS
         }
         private void DashboardKontrol_Load(object sender, EventArgs e)
         {
-            if (YoneticiPaneli.AktifTema == "Koyu")
+            if (TemaYonetici.AktifTema == "Koyu")
             {
                 this.BackColor = Color.FromArgb(120, 120, 120);
             }

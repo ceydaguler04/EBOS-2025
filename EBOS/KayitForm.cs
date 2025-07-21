@@ -75,7 +75,7 @@ namespace EBOS
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici" });
-
+            ////////////////////////////////////////////////////////////////////////////////////////
             // Kayıt Ol Butonu
             Guna2Button btnKayit = new Guna2Button()
             {
@@ -97,7 +97,7 @@ namespace EBOS
                 GirisForm giris = new GirisForm();
                 giris.Show();
                 this.Hide();
-            };
+            };////////////////////////////////////////////////////////////////////////////////////////
 
             // Girişe dön linki
             LinkLabel linkGiris = new LinkLabel()
@@ -122,6 +122,11 @@ namespace EBOS
                 lblRol, cmbRol,
                 btnKayit, linkGiris
             });
+        }
+
+        private void KayitForm_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
