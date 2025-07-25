@@ -4,6 +4,7 @@ using EBOS.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250714112202_SehirIlceEkle")]
+    partial class SehirIlceEkle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,7 +105,6 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<string>("Aciklama")
                         .IsRequired()
-
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
@@ -119,10 +121,6 @@ namespace EBOS.DataAccess.Migrations
                     b.Property<int>("IlceID")
                         .HasColumnType("int");
 
-                    b.Property<string>("GorselYolu")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<int>("SureDakika")
                         .HasColumnType("int");
 
@@ -134,8 +132,6 @@ namespace EBOS.DataAccess.Migrations
                     b.HasIndex("IlceID");
 
                     b.HasIndex("TurID");
-
-                    b.HasIndex("EtkinlikTuruTurID");
 
                     b.ToTable("Etkinlikler");
                 });
@@ -424,11 +420,7 @@ namespace EBOS.DataAccess.Migrations
 
                     b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
                         .WithMany("Etkinlikler")
-
                         .HasForeignKey("TurID")
-
-                        .HasForeignKey("EtkinlikTuruTurID")
-
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

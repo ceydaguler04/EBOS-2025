@@ -11,10 +11,9 @@ namespace EBOS.Entities
     {
         [Key]
         public int TurID { get; set; }
-        public string TurAdi { get; set; } // Örnek: Sinema, Tiyatro, Konser
-
+        public string TurAdi { get; set; } = null!;
         // İlişki
-        public ICollection<Etkinlik> Etkinlikler { get; set; }
+        public ICollection<Etkinlik> Etkinlikler { get; set; } = new List<Etkinlik>();
     }
 }
 

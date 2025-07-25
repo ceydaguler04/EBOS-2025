@@ -15,6 +15,9 @@ namespace EBOS.DataAccess
         public DbSet<Kampanya> Kampanyalar { get; set; }
         public DbSet<Degerlendirme> Degerlendirmeler { get; set; }
         public DbSet<Rapor> Raporlar { get; set; }
+        public DbSet<Sehir> Sehirler { get; set; }
+        public DbSet<Ilce> Ilceler { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -30,6 +33,14 @@ namespace EBOS.DataAccess
             modelBuilder.Entity<Kullanici>()
                 .HasIndex(k => k.Eposta)
                 .IsUnique();
+
+            modelBuilder.Entity<Ilce>()
+       .HasOne(i => i.Sehir)
+       .WithMany(s => s.Ilceler)
+       .HasForeignKey(i => i.SehirID)
+       .OnDelete(DeleteBehavior.Cascade);
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

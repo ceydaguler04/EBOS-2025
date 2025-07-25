@@ -37,7 +37,7 @@
             ClientSize = new Size(800, 450);
             Name = "GirisForm";
             Text = "GirisForm";
-            Load += GirisForm_Load;
+           // Load += GirisForm_Load;
             ResumeLayout(false);
         }
 

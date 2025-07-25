@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
+using EBOS.DataAccess;
+using EBOS.Entities;
 
 namespace EBOS
 {
@@ -9,118 +14,127 @@ namespace EBOS
         public KayitForm()
         {
             InitializeComponent();
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.ClientSize = new Size(430, 620);
+            this.Opacity = 0;
+            this.Load += FadeIn;
             ArayuzOlustur();
         }
-        private void KayitForm_Load(object sender, EventArgs e)
+        private void FadeIn(object sender, EventArgs e)
         {
-            // Şimdilik boş kalabilir, önemli değil
+            System.Windows.Forms.Timer fadeTimer = new System.Windows.Forms.Timer();
+            fadeTimer.Interval = 10;
+            fadeTimer.Tick += (s, ev) =>
+            {
+                if (this.Opacity < 1)
+                    this.Opacity += 0.05;
+                else
+                    fadeTimer.Stop();
+            };
+            fadeTimer.Start();
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            using (LinearGradientBrush brush = new LinearGradientBrush(this.ClientRectangle,
+                Color.FromArgb(90, 115, 47), Color.FromArgb(60, 80, 30), 45f))
+            {
+                e.Graphics.FillRectangle(brush, this.ClientRectangle);
+            }
         }
 
         private void ArayuzOlustur()
         {
-            this.Text = "Kayıt Ol";
-            this.ClientSize = new System.Drawing.Size(400, 600);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-
-            // Ad Soyad
-            Label lblAd = new Label() { Text = "Ad Soyad:", Location = new System.Drawing.Point(50, 40), AutoSize = true };
-            Guna2TextBox txtAd = new Guna2TextBox()
+            Guna2Panel kart = new Guna2Panel()
             {
-                Name = "txtAd",
-                PlaceholderText = "Adınızı ve Soyadınızı girin",
-                Location = new System.Drawing.Point(50, 70),
-                Size = new System.Drawing.Size(300, 40)
+                Size = new Size(360, 500),
+                Location = new Point((this.Width - 360) / 2, 60),
+                BorderRadius = 20,
+                FillColor = Color.White,
+                ShadowDecoration = { Enabled = true, Depth = 10 }
             };
+            this.Controls.Add(kart);
 
-            // E-Posta
-            Label lblEposta = new Label() { Text = "E-Posta:", Location = new System.Drawing.Point(50, 120), AutoSize = true };
-            Guna2TextBox txtEposta = new Guna2TextBox()
+            Label lblBaslik = new Label()
             {
-                Name = "txtEposta",
-                PlaceholderText = "E-posta adresinizi girin",
-                Location = new System.Drawing.Point(50, 150),
-                Size = new System.Drawing.Size(300, 40)
+                Text = "EBOS KAYIT",
+                Font = new Font("Segoe UI", 18, FontStyle.Bold),
+                ForeColor = Color.FromArgb(90, 115, 47),
+                AutoSize = true,
+                Location = new Point((kart.Width - 180) / 2, 20)
             };
+            kart.Controls.Add(lblBaslik);
 
-            // Şifre
-            Label lblSifre = new Label() { Text = "Şifre:", Location = new System.Drawing.Point(50, 200), AutoSize = true };
-            Guna2TextBox txtSifre = new Guna2TextBox()
-            {
-                Name = "txtSifre",
-                PlaceholderText = "Şifrenizi girin",
-                PasswordChar = '*',
-                Location = new System.Drawing.Point(50, 230),
-                Size = new System.Drawing.Size(300, 40)
-            };
-
-            // Şifre Tekrar
-            Label lblTekrar = new Label() { Text = "Şifre (Tekrar):", Location = new System.Drawing.Point(50, 280), AutoSize = true };
-            Guna2TextBox txtTekrar = new Guna2TextBox()
-            {
-                Name = "txtTekrar",
-                PlaceholderText = "Şifrenizi tekrar girin",
-                PasswordChar = '*',
-                Location = new System.Drawing.Point(50, 310),
-                Size = new System.Drawing.Size(300, 40)
-            };
-
-            // Rol
-            Label lblRol = new Label() { Text = "Rol:", Location = new System.Drawing.Point(50, 360), AutoSize = true };
-            Guna2ComboBox cmbRol = new Guna2ComboBox()
-            {
-                Name = "cmbRol",
-                Location = new System.Drawing.Point(50, 390),
-                Size = new System.Drawing.Size(300, 40),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
+            var txtAdSoyad = new Guna2TextBox() { PlaceholderText = "Ad Soyad", Location = new Point(40, 70), Size = new Size(280, 40), BorderRadius = 6 };
+            var txtEposta = new Guna2TextBox() { PlaceholderText = "E-posta", Location = new Point(40, 120), Size = new Size(280, 40), BorderRadius = 6 };
+            var txtSifre = new Guna2TextBox() { PlaceholderText = "Şifre", Location = new Point(40, 170), Size = new Size(280, 40), PasswordChar = '*', BorderRadius = 6 };
+            var txtTekrar = new Guna2TextBox() { PlaceholderText = "Şifre (Tekrar)", Location = new Point(40, 220), Size = new Size(280, 40), PasswordChar = '*', BorderRadius = 6 };
+            var cmbRol = new Guna2ComboBox() { Location = new Point(40, 270), Size = new Size(280, 40), DropDownStyle = ComboBoxStyle.DropDownList };
             cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici" });
-            ////////////////////////////////////////////////////////////////////////////////////////
-            // Kayıt Ol Butonu
-            Guna2Button btnKayit = new Guna2Button()
+
+            var btnKayit = new Guna2Button()
             {
                 Text = "Kayıt Ol",
-                Location = new System.Drawing.Point(50, 450),
-                Size = new System.Drawing.Size(300, 45)
+                Location = new Point(40, 330),
+                Size = new Size(280, 45),
+                BorderRadius = 10,
+                FillColor = Color.FromArgb(90, 115, 47),
+                HoverState = { FillColor = Color.FromArgb(70, 100, 40) }
             };
+
             btnKayit.Click += (s, e) =>
             {
-                if (txtSifre.Text != txtTekrar.Text)
+                string adSoyad = txtAdSoyad.Text.Trim();
+                string eposta = txtEposta.Text.Trim();
+                string sifre = txtSifre.Text.Trim();
+                string tekrar = txtTekrar.Text.Trim();
+                string rol = cmbRol.SelectedItem?.ToString();
+
+                if (string.IsNullOrWhiteSpace(adSoyad) || string.IsNullOrWhiteSpace(eposta) ||
+                    string.IsNullOrWhiteSpace(sifre) || string.IsNullOrWhiteSpace(tekrar) || string.IsNullOrWhiteSpace(rol))
+                {
+                    MessageBox.Show("Lütfen tüm alanları doldurun.", "Uyarı");
+                    return;
+                }
+
+                if (sifre != tekrar)
                 {
                     MessageBox.Show("Şifreler uyuşmuyor!", "Hata");
                     return;
                 }
 
-                // Gerçek veri ekleme işlemi yapılabilir
-                MessageBox.Show("Kayıt başarıyla tamamlandı!", "Bilgi");
+                using (var db = new AppDbContext())
+                {
+                    if (db.Kullanicilar.Any(k => k.Eposta == eposta))
+                    {
+                        MessageBox.Show("Bu e-posta zaten kayıtlı!", "Hata");
+                        return;
+                    }
 
-                GirisForm giris = new GirisForm();
-                giris.Show();
+                    db.Kullanicilar.Add(new Kullanici { AdSoyad = adSoyad, Eposta = eposta, Sifre = sifre, Rol = rol });
+                    db.SaveChanges();
+                }
+
+                MessageBox.Show("Kayıt başarıyla tamamlandı!", "Bilgi");
+                new GirisForm().Show();
                 this.Hide();
             };////////////////////////////////////////////////////////////////////////////////////////
 
-            // Girişe dön linki
-            LinkLabel linkGiris = new LinkLabel()
+            var linkGiris = new LinkLabel()
             {
                 Text = "Zaten hesabın var mı? Giriş yap",
-                Location = new System.Drawing.Point(50, 510),
+                LinkColor = Color.FromArgb(90, 115, 47),
+                ActiveLinkColor = Color.FromArgb(60, 80, 30),
+                Location = new Point(40, 390),
                 AutoSize = true
             };
-            linkGiris.Click += (s, e) =>
-            {
-                GirisForm giris = new GirisForm();
-                giris.Show();
-                this.Hide();
-            };
+            linkGiris.Click += (s, e) => { new GirisForm().Show(); this.Hide(); };
 
-            this.Controls.AddRange(new Control[]
+            kart.Controls.AddRange(new Control[]
             {
-                lblAd, txtAd,
-                lblEposta, txtEposta,
-                lblSifre, txtSifre,
-                lblTekrar, txtTekrar,
-                lblRol, cmbRol,
-                btnKayit, linkGiris
+                txtAdSoyad, txtEposta, txtSifre, txtTekrar, cmbRol, btnKayit, linkGiris
             });
         }
 

@@ -1,16 +1,11 @@
 ﻿namespace EBOS
 {
-    partial class SifreSifirlaForm
+    partial class SifreSifirlamaForm
     {
         /// <summary>
-        /// Required designer variable.
+        /// Gereken tasarım bileşenlerini temizler.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">yönetilen kaynaklar atılsın mı?</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,20 +15,14 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        /// Visual Studio Designer tarafından kullanılır. Şu an boş.
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "SifreSifirlaForm";
+            // Artık tamamen boş - elle tasarım kullanılmadığı için.
         }
 
-        #endregion
+        private System.ComponentModel.IContainer components = null;
     }
 }

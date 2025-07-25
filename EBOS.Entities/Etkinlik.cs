@@ -6,37 +6,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
 namespace EBOS.Entities
 {
     public class Etkinlik
+
     {
         [Key]
         public int EtkinlikID { get; set; }
 
         [Required]
         [MaxLength(100)]
-        public string EtkinlikAdi { get; set; }
+        public string EtkinlikAdi { get; set; } = null!;
 
         [MaxLength(500)]
-        public string Aciklama { get; set; }
+        public string Aciklama { get; set; } = string.Empty;
 
         [Required]
-        public int TurID { get; set; } // Foreign Key alanı
+        public int TurID { get; set; }
 
         [ForeignKey("TurID")]
-        public EtkinlikTuru EtkinlikTuru { get; set; } // Navigation: Etkinlik bir türe ait
+        public EtkinlikTuru EtkinlikTuru { get; set; } = null!;  // Navigation property düzeltildi
 
         [MaxLength(200)]
-        public string GorselYolu { get; set; } // Etkinliğin afiş görseli dosya yolu
+        public string GorselYolu { get ; set; } = string.Empty;
 
         [Range(1, 500)]
         public int SureDakika { get; set; } // Süre (dakika cinsinden)
-        public int KullaniciID { get; set; }
-
-        [ForeignKey("KullaniciID")]
-        public Kullanici Kullanici { get; set; }
 
         // Navigation Properties
         public ICollection<Seans> Seanslar { get; set; } // 1 Etkinlik → Çok Seans
