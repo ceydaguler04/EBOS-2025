@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -11,15 +10,15 @@ namespace EBOS
 {
     public partial class KullaniciPaneli : Form
     {
-        // Alanlar
         private Guna2Panel topPanel;
         private Label lblBaslik;
-        private Guna2HtmlLabel lblAdMenu;
+        private Label lblKullaniciAd;
         private Guna2Panel leftMenu;
         private IconButton aktifButon = null;
         private Panel mainContentPanel;
 
         private IconButton btnSinema, btnTiyatro, btnKonser, btnWorkshop, btnSeminer, btnAyar, btnBiletlerim;
+        private ContextMenuStrip contextMenu;
 
         private string girisYapanEposta;
         private string girisYapanAdSoyad;
@@ -32,6 +31,7 @@ namespace EBOS
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
+            this.BackColor = Color.WhiteSmoke;
 
             girisYapanEposta = eposta;
 
@@ -41,45 +41,27 @@ namespace EBOS
                 girisYapanAdSoyad = kullanici != null ? kullanici.AdSoyad : "Bilinmeyen";
             }
 
-            // Üst Panel
             topPanel = new Guna2Panel()
             {
                 Size = new Size(this.Width, 60),
+                Location = new Point(0, 0),
+                FillColor = Color.FromArgb(90, 115, 47),
                 Dock = DockStyle.Top
             };
             this.Controls.Add(topPanel);
 
-            // Sol Menü
-            leftMenu = new Guna2Panel()
-            {
-                Size = new Size(200, this.Height - topPanel.Height),
-                Dock = DockStyle.Left
-            };
-            this.Controls.Add(leftMenu);
-
-            // Ana İçerik Paneli
-            mainContentPanel = new Panel()
-            {
-                Dock = DockStyle.Fill
-            };
-            this.Controls.Add(mainContentPanel);
-            this.Controls.SetChildIndex(mainContentPanel, 0);
-
-            // Başlık
             lblBaslik = new Label()
             {
-                Text = "KULLANICI PANELİ",
+                Text = "Kullanıcı Paneli",
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
-                AutoSize = true,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Location = new Point(10, 10)
+                Location = new Point(20, 15),
+                AutoSize = true
             };
-            leftMenu.Controls.Add(lblBaslik);
+            topPanel.Controls.Add(lblBaslik);
 
-            // Giriş Yapan Kullanıcı
-            lblAdMenu = new Guna2HtmlLabel()
+            lblKullaniciAd = new Label()
             {
                 Text = girisYapanAdSoyad,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
@@ -89,46 +71,74 @@ namespace EBOS
                 Cursor = Cursors.Hand,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right
             };
-            topPanel.Controls.Add(lblAdMenu);
-            lblAdMenu.Location = new Point(topPanel.Width - lblAdMenu.Width - 30, 20);
+            lblKullaniciAd.Location = new Point(this.Width - 160, 20);
+            topPanel.Controls.Add(lblKullaniciAd);
 
-            // Çıkış menüsü
-            ContextMenuStrip contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add("Çıkış Yap", null, (s, e) =>
+            contextMenu = new ContextMenuStrip
             {
-                this.Hide();
-                new GirisForm().Show();
-            });
-            lblAdMenu.MouseEnter += (s, e) => contextMenu.Show(Cursor.Position);
+                BackColor = Color.FromArgb(90, 115, 70),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10, FontStyle.Regular),
+                ShowImageMargin = false,
+                Renderer = new CustomColorRenderer()
+            };
 
-            // Menü Butonları
-            btnSinema = MenuIconButton("Sinema", IconChar.Film, 70);
-            btnTiyatro = MenuIconButton("Tiyatro", IconChar.TheaterMasks, 120);
-            btnKonser = MenuIconButton("Konser", IconChar.Music, 170);
-            btnWorkshop = MenuIconButton("Workshop", IconChar.Tools, 220);
-            btnSeminer = MenuIconButton("Seminer", IconChar.ChalkboardTeacher, 270);
-            btnAyar = MenuIconButton("Ayarlar", IconChar.Cogs, 320);
-            btnBiletlerim = MenuIconButton("Biletlerim", IconChar.TicketAlt, 370);
+            ToolStripMenuItem cikisItem = new ToolStripMenuItem("Çıkış Yap");
+            cikisItem.Click += (s, e) =>
+            {
+                GirisForm giris = new GirisForm();
+                giris.Show();
+                this.Close();
+            };
+            contextMenu.Items.Add(cikisItem);
+            TemaYonetici.ContextMenuRenkleriUygula(contextMenu);
 
-            // Eventler
+            lblKullaniciAd.MouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    contextMenu.Show(lblKullaniciAd, new Point(0, lblKullaniciAd.Height));
+                }
+            };
+
+            leftMenu = new Guna2Panel()
+            {
+                Size = new Size(200, this.Height - 60),
+                Location = new Point(0, 60),
+                FillColor = Color.FromArgb(90, 115, 47)
+            };
+            this.Controls.Add(leftMenu);
+
+            btnSinema = MenuIconButton("Sinema", IconChar.Film, 40);
+            btnTiyatro = MenuIconButton("Tiyatro", IconChar.TheaterMasks, 90);
+            btnKonser = MenuIconButton("Konser", IconChar.Music, 140);
+            btnWorkshop = MenuIconButton("Workshop", IconChar.Tools, 190);
+            btnSeminer = MenuIconButton("Seminer", IconChar.ChalkboardTeacher, 240);
+            btnBiletlerim = MenuIconButton("Biletlerim", IconChar.TicketAlt, 290);
+            btnAyar = MenuIconButton("Ayarlar", IconChar.Cogs, 340);
+
             btnSinema.Click += (s, e) => GosterYeniKontrol(new SinemaKontrol(girisYapanEposta), btnSinema);
             btnTiyatro.Click += (s, e) => GosterYeniKontrol(new TiyatroKontrol(girisYapanEposta), btnTiyatro);
             btnKonser.Click += (s, e) => GosterYeniKontrol(new KonserKontrol(girisYapanEposta), btnKonser);
             btnWorkshop.Click += (s, e) => GosterYeniKontrol(new WorkshopKontrol(girisYapanEposta), btnWorkshop);
             btnSeminer.Click += (s, e) => GosterYeniKontrol(new SeminerKontrol(girisYapanEposta), btnSeminer);
-            btnAyar.Click += (s, e) => GosterYeniKontrol(new AyarKontrol(girisYapanEposta), btnAyar);
             btnBiletlerim.Click += (s, e) => GosterYeniKontrol(new BiletlerimKontrol(girisYapanEposta), btnBiletlerim);
+            btnAyar.Click += (s, e) => GosterYeniKontrol(new AyarlarKontroll(girisYapanEposta), btnAyar);
 
             leftMenu.Controls.AddRange(new Control[] {
                 btnSinema, btnTiyatro, btnKonser, btnWorkshop,
-                btnSeminer, btnAyar, btnBiletlerim
+                btnSeminer, btnBiletlerim, btnAyar
             });
 
-            // TEMA UYGULA
-            TemaYonetici.Uygula(this);
+            mainContentPanel = new Panel()
+            {
+                Location = new Point(210, 80),
+                Size = new Size(850, 550),
+                BackColor = Color.WhiteSmoke
+            };
+            this.Controls.Add(mainContentPanel);
 
-            // Açılışta sinema
-            GosterYeniKontrol(new SinemaKontrol(girisYapanEposta), btnSinema);
+            this.Load += KullaniciPaneli_Load;
         }
 
         private IconButton MenuIconButton(string text, IconChar icon, int top)
@@ -146,49 +156,85 @@ namespace EBOS
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
             };
+
             btn.FlatAppearance.BorderSize = 0;
             btn.FlatAppearance.MouseOverBackColor = TemaYonetici.HoverRenk();
+            btn.Click += (s, e) => SetActiveButton(btn);
             return btn;
+        }
+
+        private void SetActiveButton(IconButton buton)
+        {
+            if (aktifButon != null)
+            {
+                aktifButon.BackColor = Color.Transparent;
+                aktifButon.ForeColor = Color.White;
+                aktifButon.IconColor = Color.White;
+            }
+
+            buton.BackColor = TemaYonetici.SeciliButonRengi();
+            buton.ForeColor = Color.White;
+            buton.IconColor = Color.White;
+            aktifButon = buton;
         }
 
         private void GosterYeniKontrol(UserControl kontrol, IconButton aktif)
         {
-            if (aktifButon != null)
-                aktifButon.BackColor = Color.Transparent;
-
-            aktif.BackColor = TemaYonetici.SeciliButonRengi(); // Tema uyumlu seçili buton rengi
-            aktifButon = aktif;
-
+            SetActiveButton(aktif);
             mainContentPanel.Controls.Clear();
             kontrol.Dock = DockStyle.Fill;
             mainContentPanel.Controls.Add(kontrol);
         }
+
         private void KullaniciPaneli_Load(object sender, EventArgs e)
         {
-            // Tema veya başlangıç ayarları yapılacaksa buraya yazabilirsin
+            ApplyTheme();
+            SetActiveButton(btnSinema);
+            btnSinema.PerformClick();
         }
-        public void SolMenuTemayiGuncelle()
+
+        public void ApplyTheme()
         {
+            TemaYonetici.Uygula(this);
+
+            if (TemaYonetici.AktifTema == "Yesil")
+            {
+                this.BackColor = Color.FromArgb(255, 255, 255);
+                leftMenu.FillColor = Color.FromArgb(90, 115, 47);
+                topPanel.FillColor = Color.FromArgb(90, 115, 47);
+            }
+            else if (TemaYonetici.AktifTema == "Lacivert")
+            {
+                this.BackColor = Color.FromArgb(255, 255, 255);
+                leftMenu.FillColor = Color.FromArgb(40, 55, 120);
+                topPanel.FillColor = Color.FromArgb(40, 55, 120);
+            }
+            else if (TemaYonetici.AktifTema == "Koyu")
+            {
+                this.BackColor = Color.FromArgb(120, 120, 120);
+                leftMenu.FillColor = Color.FromArgb(50, 50, 50);
+                topPanel.FillColor = Color.FromArgb(50, 50, 50);
+            }
+
             foreach (Control control in leftMenu.Controls)
             {
-                if (control is IconButton btn && btn != aktifButon)
+                if (control is IconButton btn)
                 {
-                    btn.BackColor = Color.Transparent;
-                    btn.ForeColor = Color.White;
                     btn.FlatAppearance.MouseOverBackColor = TemaYonetici.HoverRenk();
-                }
-                else if (control is IconButton seciliBtn && seciliBtn == aktifButon)
-                {
-                    seciliBtn.BackColor = TemaYonetici.SeciliButonRengi();
+                    btn.Refresh();
                 }
             }
 
-            // Panel renkleri de değişsin
-            leftMenu.FillColor = TemaYonetici.TemaButonRenk();
-            topPanel.FillColor = TemaYonetici.TemaButonRenk();
+            if (aktifButon != null)
+            {
+                aktifButon.BackColor = TemaYonetici.SeciliButonRengi();
+                
+            }
+
+            TemaYonetici.ContextMenuRenkleriUygula(contextMenu);
+            leftMenu.Invalidate(true);
         }
     }
 }
-   

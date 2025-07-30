@@ -4,6 +4,7 @@ using EBOS.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250729112828_Guncelle_EtkinlikNullable")]
+    partial class Guncelle_EtkinlikNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,12 +109,13 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<string>("EtkinlikAdi")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("GorselYolu")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<int?>("IlceID")
                         .HasColumnType("int");
@@ -307,9 +311,6 @@ namespace EBOS.DataAccess.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<int>("IlceID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MekanApiId")
                         .HasColumnType("int");
 
                     b.Property<string>("Sehir")

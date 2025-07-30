@@ -4,23 +4,27 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using EBOS.DataAccess;
+using EBOS.Entities;
 using Guna.UI2.WinForms;
+using Microsoft.EntityFrameworkCore;
 
 namespace EBOS
 {
     public partial class EtkinliklerKontrol : UserControl
     {
         private int? aktifKullaniciId;
-        private int? rol;
+        private string rol;
 
         private Label lblBaslik;
         private Guna2TextBox txtArama;
         private Guna2Button btnYeniEkle;
+        private Guna2Button btnApiVeriGetir;
         private FlowLayoutPanel flpKartlar;
 
-        public EtkinliklerKontrol(int? kullaniciId = null, int? rol = null)
+        public EtkinliklerKontrol(int? kullaniciId = null, string rol = null)
         {
             InitializeComponent();
+            this.Load += EtkinliklerKontrol_Load;
             this.Dock = DockStyle.Fill;
 
             this.aktifKullaniciId = kullaniciId;
@@ -50,6 +54,11 @@ namespace EBOS
                 Font = new Font("Segoe UI", 10),
                 BorderRadius = 10
             };
+            txtArama.TextChanged += (s, e) =>
+            {
+                EtkinlikKartlariniOlustur(txtArama.Text);
+            };
+
             this.Controls.Add(txtArama);
 
             btnYeniEkle = new Guna2Button()
@@ -62,7 +71,24 @@ namespace EBOS
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
+            btnYeniEkle.Click += btnYeniEtkinlikEkle_Click;
             this.Controls.Add(btnYeniEkle);
+            
+            if (!string.IsNullOrEmpty(rol) && rol.ToLower() == "yönetici")
+            {
+                btnApiVeriGetir = new Guna2Button()
+                {
+                    Text = "API'den Getir",
+                    Size = new Size(150, 40),
+                    Location = new Point(580, 80), // Yeni Etkinlik Ekle'nin sağında olsun
+                    BorderRadius = 10,
+                    FillColor = Color.DarkOrange,
+                    ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                };
+                btnApiVeriGetir.Click += BtnApiVeriGetir_Click;
+                this.Controls.Add(btnApiVeriGetir);
+            }
 
             flpKartlar = new FlowLayoutPanel()
             {
@@ -76,170 +102,254 @@ namespace EBOS
             flpKartlar.FlowDirection = FlowDirection.LeftToRight;
             flpKartlar.WrapContents = true;
         }
-
-        //private void EtkinlikKartlariniOlustur()
-        //{
-        //    flpKartlar.Controls.Clear();
-
-        //    using (var db = new AppDbContext())
-        //    {
-        //        var etkinlikler = db.Etkinlikler.AsQueryable();
-
-        //        if (rol == 3)
-        //        {
-        //            etkinlikler = etkinlikler.Where(x => x.KullaniciID == aktifKullaniciId);
-        //        }
-
-        //        foreach (var etkinlik in etkinlikler.ToList())
-        //        {
-        //            Guna2Panel kart = new Guna2Panel();
-        //            kart.Size = new Size(300, 350);
-        //            kart.BorderRadius = 15;
-        //            kart.FillColor = Color.White;
-        //            kart.ShadowDecoration.Enabled = true;
-        //            kart.ShadowDecoration.Depth = 10;
-        //            kart.Margin = new Padding(15);
-
-        //            PictureBox pb = new PictureBox();
-        //            pb.ImageLocation = Path.Combine(Application.StartupPath, "Gorseller", etkinlik.GorselYolu);
-        //            pb.Size = new Size(280, 150);
-        //            pb.SizeMode = PictureBoxSizeMode.StretchImage;
-        //            pb.Location = new Point(10, 10);
-        //            kart.Controls.Add(pb);
-
-        //            Label lblAd = new Label();
-        //            lblAd.Text = etkinlik.EtkinlikAdi;
-        //            lblAd.Font = new Font("Segoe UI", 12, FontStyle.Bold);
-        //            lblAd.Location = new Point(10, 170);
-        //            lblAd.AutoSize = true;
-        //            kart.Controls.Add(lblAd);
-
-        //            Label lblTur = new Label();
-        //            lblTur.Text = $"Tür: {etkinlik.EtkinlikTuru.TurAdi} | Süre: {etkinlik.SureDakika} dk";
-        //            lblTur.Font = new Font("Segoe UI", 9);
-        //            lblTur.Location = new Point(10, 200);
-        //            lblTur.AutoSize = true;
-        //            kart.Controls.Add(lblTur);
-
-        //            Label lblTarih = new Label();
-        //            lblTarih.Text = $"📅 {etkinlik.Tarih.ToString("dd.MM.yyyy")} ⏰ {etkinlik.Saat}";
-        //            lblTarih.Font = new Font("Segoe UI", 9, FontStyle.Italic);
-        //            lblTarih.ForeColor = Color.Gray;
-        //            lblTarih.Location = new Point(10, 230);
-        //            lblTarih.AutoSize = true;
-        //            kart.Controls.Add(lblTarih);
-
-        //            Guna2Button btnDuzenle = new Guna2Button();
-        //            btnDuzenle.Text = "Düzenle";
-        //            btnDuzenle.Size = new Size(100, 30);
-        //            btnDuzenle.FillColor = Color.DodgerBlue;
-        //            btnDuzenle.ForeColor = Color.White;
-        //            btnDuzenle.Location = new Point(10, 270);
-        //            kart.Controls.Add(btnDuzenle);
-
-        //            Guna2Button btnSil = new Guna2Button();
-        //            btnSil.Text = "Sil";
-        //            btnSil.Size = new Size(100, 30);
-        //            btnSil.FillColor = Color.Crimson;
-        //            btnSil.ForeColor = Color.White;
-        //            btnSil.Location = new Point(120, 270);
-        //            kart.Controls.Add(btnSil);
-
-        //            flpKartlar.Controls.Add(kart);
-        //        }
-        //    }
-        //}
-        private void EtkinlikKartlariniOlustur()
+        private void EtkinlikKartlariniOlustur(string filtre = "")
         {
             flpKartlar.Controls.Clear();
-
-            // Sahte veri listesi
-            var etkinlikler = new List<dynamic>()
-    {
-        new {
-            EtkinlikAdi = "Rock Festivali",
-            TurAdi = "Konser",
-            SureDakika = 120,
-            GorselYolu = "afis.jpg",
-            Tarih = new DateTime(2025, 7, 15),
-            Saat = new TimeSpan(20, 0, 0)
-        },
-        new {
-            EtkinlikAdi = "Aile Arasında",
-            TurAdi = "Tiyatro",
-            SureDakika = 100,
-            GorselYolu = "aile.jpg",
-            Tarih = new DateTime(2025, 7, 17),
-            Saat = new TimeSpan(18, 30, 0)
-        },
-         new {
-            EtkinlikAdi = " Festivali",
-            TurAdi = "Konser",
-            SureDakika = 120,
-            GorselYolu = "afis.jpg",
-            Tarih = new DateTime(2025, 7, 15),
-            Saat = new TimeSpan(20, 0, 0)
-        },
-    };
-
-            foreach (var etkinlik in etkinlikler)
+            using (var db = new AppDbContext())
             {
-                Guna2Panel kart = new Guna2Panel();
-                kart.Size = new Size(240,330/*300, 350*/);
-                kart.BorderRadius = 15;
-                kart.FillColor = Color.White;
-                kart.ShadowDecoration.Enabled = true;
-                kart.ShadowDecoration.Depth = 10;
-                kart.Margin = new Padding(8);
+                //var etkinlikler = db.Etkinlikler
+                //                    .Include(e => e.EtkinlikTuru)
+                //                    .ToList();
+                var etkinlikler = db.Etkinlikler
+                    .Include(e => e.EtkinlikTuru)
+                    .OrderByDescending(e => e.Tarih)
+                    .Take(50)
+                    .ToList();
+                // filtre boş değilse, filtrele
+                if (!string.IsNullOrWhiteSpace(filtre))
+                {
+                    etkinlikler = etkinlikler
+                        .Where(e => e.EtkinlikAdi.ToLower().Contains(filtre.ToLower()))
+                        .ToList();
+                }
 
-                PictureBox pb = new PictureBox();
-                pb.ImageLocation = Path.Combine(Application.StartupPath, "Gorseller", etkinlik.GorselYolu);
-                pb.Size = new Size(230,140/*280, 150*/);
-                pb.SizeMode = PictureBoxSizeMode.StretchImage;
-                pb.Location = new Point(10, 10);
-                kart.Controls.Add(pb);
+                foreach (var etkinlik in etkinlikler)
+                {
+                    Guna2Panel kart = new Guna2Panel();
+                    kart.Size = new Size(240, 330/*300, 350*/);
+                    kart.BorderRadius = 15;
+                    kart.FillColor = Color.White;
+                    kart.ShadowDecoration.Enabled = true;
+                    kart.ShadowDecoration.Depth = 10;
+                    kart.Margin = new Padding(8);
 
-                Label lblAd = new Label();
-                lblAd.Text = etkinlik.EtkinlikAdi;
-                lblAd.Font = new Font("Segoe UI", 12, FontStyle.Bold);
-                lblAd.Location = new Point(10, 170);
-                lblAd.AutoSize = true;
-                kart.Controls.Add(lblAd);
+                    PictureBox pb = new PictureBox();
+                    try
+                    {
+                        pb.Load(etkinlik.GorselYolu); // API'den gelen URL'yi direkt yükler
+                    }
+                    catch
+                    {
+                        pb.Image = null;
+                    }
 
-                Label lblTur = new Label();
-                lblTur.Text = $"Tür: {etkinlik.TurAdi} | Süre: {etkinlik.SureDakika} dk";
-                lblTur.Font = new Font("Segoe UI", 9);
-                lblTur.Location = new Point(10, 200);
-                lblTur.AutoSize = true;
-                kart.Controls.Add(lblTur);
+                    pb.Size = new Size(230, 140/*280, 150*/);
+                    pb.SizeMode = PictureBoxSizeMode.StretchImage;
+                    pb.Location = new Point(10, 10);
+                    kart.Controls.Add(pb);
 
-                Label lblTarih = new Label();
-                lblTarih.Text = $"📅 {etkinlik.Tarih:dd.MM.yyyy} ⏰ {etkinlik.Saat:hh\\:mm}";
-                lblTarih.Font = new Font("Segoe UI", 9, FontStyle.Italic);
-                lblTarih.ForeColor = Color.Gray;
-                lblTarih.Location = new Point(10, 230);
-                lblTarih.AutoSize = true;
-                kart.Controls.Add(lblTarih);
+                    Label lblAd = new Label();
+                    lblAd.Text = etkinlik.EtkinlikAdi;
+                    lblAd.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+                    lblAd.Location = new Point(10, 170);
+                    lblAd.AutoSize = true;
+                    kart.Controls.Add(lblAd);
 
-                Guna2Button btnDuzenle = new Guna2Button();
-                btnDuzenle.Text = "Düzenle";
-                btnDuzenle.Size = new Size(100, 30);
-                btnDuzenle.FillColor = Color.DodgerBlue;
-                btnDuzenle.ForeColor = Color.White;
-                btnDuzenle.Location = new Point(10, 270);
-                kart.Controls.Add(btnDuzenle);
+                    Label lblTur = new Label();
+                    lblTur.Text = $"Tür: {etkinlik.EtkinlikTuru.TurAdi} | Süre: {etkinlik.SureDakika} dk";
+                    lblTur.Font = new Font("Segoe UI", 9);
+                    lblTur.Location = new Point(10, 200);
+                    lblTur.AutoSize = true;
+                    kart.Controls.Add(lblTur);
 
-                Guna2Button btnSil = new Guna2Button();
-                btnSil.Text = "Sil";
-                btnSil.Size = new Size(100, 30);
-                btnSil.FillColor = Color.Crimson;
-                btnSil.ForeColor = Color.White;
-                btnSil.Location = new Point(120, 270);
-                kart.Controls.Add(btnSil);
+                    Label lblTarih = new Label();
+                    lblTarih.Text = $"📅 {etkinlik.Tarih:dd.MM.yyyy} ⏰ {etkinlik.Saat:hh\\:mm}";
+                    lblTarih.Font = new Font("Segoe UI", 9, FontStyle.Italic);
+                    lblTarih.ForeColor = Color.Gray;
+                    lblTarih.Location = new Point(10, 230);
+                    lblTarih.AutoSize = true;
+                    kart.Controls.Add(lblTarih);
 
-                flpKartlar.Controls.Add(kart);
+                    Guna2Button btnDuzenle = new Guna2Button();
+                    btnDuzenle.Text = "Düzenle";
+                    btnDuzenle.Size = new Size(100, 30);
+                    btnDuzenle.FillColor = Color.DodgerBlue;
+                    btnDuzenle.ForeColor = Color.White;
+                    btnDuzenle.Location = new Point(10, 270);
+                    kart.Controls.Add(btnDuzenle);
+
+                    Guna2Button btnSil = new Guna2Button();
+                    btnSil.Text = "Sil";
+                    btnSil.Size = new Size(100, 30);
+                    btnSil.FillColor = Color.Crimson;
+                    btnSil.ForeColor = Color.White;
+                    btnSil.Location = new Point(120, 270);
+                    kart.Controls.Add(btnSil);
+
+                    flpKartlar.Controls.Add(kart);
+                }
             }
         }
+        private void btnYeniEtkinlikEkle_Click(object sender, EventArgs e)
+        {
+            var form = new EtkinlikEkleForm(); // null değilse
+            form.ShowDialog();
+        }
+
+        private async void BtnApiVeriGetir_Click(object sender, EventArgs e)
+        {
+            var eslesmeyenKategoriler = new HashSet<string>();
+            var eslesmeyenMekanlar = new List<string>();
+
+            var tumEtkinlikler = await Helpers.EtkinlikApiYardimcisi.TumEtkinlikleriGetirAsync();
+
+            if (tumEtkinlikler.Count == 0)
+            {
+                MessageBox.Show("API'den hiç etkinlik verisi gelmedi.");
+                return;
+            }
+
+            int skipTur = 0, skipMekan = 0, skipIlce = 0, eklendi = 0, zatenVardi = 0;
+
+            var kategoriMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "klasik müzik", "konser" }, { "pop müzik", "konser" }, { "alternatif müzik", "konser" },
+                { "parti & canlı müzik", "konser" }, { "caz müzik", "konser" },
+                { "aşçılık ve mutfak", "workshop" },
+                { "tiyatro ve gösteriler", "tiyatro" }, { "dans ve müzikal gösteriler", "konser" },
+                { "çocuk", "seminer" }, { "çocuk gelişimi", "seminer" },
+                { "diğer", "seminer" }, { "sanat", "seminer" },
+                { "sinema", "sinema" }, { "konser", "konser" },
+                { "workshop", "workshop" }, { "seminer", "seminer" }, { "tiyatro", "tiyatro" },
+                { "rock müzik", "konser" },
+                { "dünya müzik", "konser" },
+                { "türk sanat - halk müziği", "konser" },
+                { "çocuk tiyatrosu", "tiyatro" },
+                { "turizm", "seminer" },
+                { "eğitim - öğretim", "seminer" }
+
+            };
+
+            using (var db = new AppDbContext())
+            {
+                foreach (var item in tumEtkinlikler)
+                {
+                    if (!DateTime.TryParse(item.Start, out DateTime parsedTarih))
+                        continue;
+
+                    if (db.Etkinlikler.Any(x => x.EtkinlikAdi == item.EtkinlikAdi && x.Tarih == parsedTarih))
+                    {
+                        zatenVardi++;
+                        continue;
+                    }
+
+                    var gelenKategori = (item.Category?.Name ?? "").Trim().ToLower();
+                    kategoriMap.TryGetValue(gelenKategori, out string eslesenKategori);
+
+                    if (string.IsNullOrWhiteSpace(eslesenKategori))
+                    {
+                        eslesmeyenKategoriler.Add(gelenKategori);
+                        skipTur++;
+                        continue;
+                    }
+
+                    var tur = db.EtkinlikTurleri.FirstOrDefault(t => t.TurAdi.Trim().ToLower() == eslesenKategori.ToLower());
+                    if (tur == null) { skipTur++; continue; }
+                    int turId = tur.TurID;
+
+                    int venueId = item.Venue?.Id ?? 0;
+                    if (venueId == 0) { skipMekan++; continue; }
+
+                    var apiMekan = await Helpers.EtkinlikApiYardimcisi.MekanGetirAsync(venueId);
+                    if (apiMekan == null)
+                    {
+                        eslesmeyenMekanlar.Add($"ID: {venueId} - Etkinlik: {item.EtkinlikAdi}");
+                        skipMekan++;
+                        continue;
+                    }
+
+                    var mekan = db.Mekanlar.FirstOrDefault(m => m.MekanApiId == apiMekan.Id);
+                    if (mekan == null)
+                    {
+                        var yeniMekan = new Mekan
+                        {
+                            Ad = apiMekan.Name,
+                            Adres = apiMekan.Address,
+                            Sehir = apiMekan.City?.Name,
+                            Ilce = apiMekan.District?.Name,
+                            Semt = apiMekan.Neighborhood?.Name ?? "-",
+                            Enlem = double.TryParse(apiMekan.Lat, out double lat) ? lat : null,
+                            Boylam = double.TryParse(apiMekan.Lng, out double lng) ? lng : null,
+                            MekanApiId = apiMekan.Id
+                        };
+
+                        db.Mekanlar.Add(yeniMekan);
+                        db.SaveChanges();
+                        mekan = yeniMekan;
+                    }
+                    int? mekanId = mekan?.MekanID;
+
+                    int? ilceId = null;
+                    var ilceAdi = apiMekan?.District?.Name;
+                    if (!string.IsNullOrWhiteSpace(ilceAdi))
+                    {
+                        var ilce = db.Ilceler.FirstOrDefault(i => i.IlceAdi.ToLower() == ilceAdi.ToLower());
+                        if (ilce != null)
+                            ilceId = ilce.IlceID;
+                        else
+                            skipIlce++;
+                    }
+                    else skipIlce++;
+
+                    int sureDakika = 120;
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(item.Start) && !string.IsNullOrEmpty(item.End))
+                        {
+                            var baslangic = DateTime.Parse(item.Start);
+                            var bitis = DateTime.Parse(item.End);
+                            sureDakika = (int)(bitis - baslangic).TotalMinutes;
+                        }
+                    }
+                    catch { }
+
+                    db.Etkinlikler.Add(new Etkinlik
+                    {
+                        EtkinlikAdi = item.EtkinlikAdi,
+                        Aciklama = item.Aciklama,
+                        SureDakika = sureDakika,
+                        TurID = turId,
+                        Tarih = parsedTarih,
+                        Saat = parsedTarih.TimeOfDay,
+                        GorselYolu = item.GorselUrl ?? "",
+                        IlceID = ilceId,
+                        MekanID = mekanId,
+                        KullaniciID = aktifKullaniciId ?? 2
+                    });
+
+                    eklendi++;
+                }
+
+                var kayit = db.SaveChanges();
+                MessageBox.Show(
+                    $"Kaydedilen: {eklendi}\n" +
+                    $"SaveChanges dönen: {kayit}\n" +
+                    $"Zaten vardı: {zatenVardi}\n" +
+                    $"Tür bulunamadı: {skipTur}\n" +
+                    $"Mekan bulunamadı: {skipMekan}\n" +
+                    $"İlçe bulunamadı/boş: {skipIlce}"
+                );
+
+                if (eslesmeyenKategoriler.Count > 0)
+                    MessageBox.Show("Eşleşmeyen Kategoriler:\n\n" + string.Join("\n", eslesmeyenKategoriler));
+
+                if (eslesmeyenMekanlar.Count > 0)
+                    MessageBox.Show("Eşleşmeyen Mekanlar:\n\n" + string.Join("\n", eslesmeyenMekanlar));
+            }
+
+            EtkinlikKartlariniOlustur();
+        }
+
         private void EtkinliklerKontrol_Load(object sender, EventArgs e)
         {
             if (TemaYonetici.AktifTema == "Koyu")
@@ -250,216 +360,7 @@ namespace EBOS
             {
                 this.BackColor = Color.White;
             }
+            EtkinlikKartlariniOlustur();
         }
     }
 }
-
-//using System;
-//using System.Drawing;
-//using System.Windows.Forms;
-//using EBOS.DataAccess;
-//using Guna.UI2.WinForms;
-
-//namespace EBOS
-//{
-//    public partial class EtkinliklerKontrol : UserControl
-//    {
-//        /// <summary>
-
-
-//            private int? aktifKullaniciId;
-//            private int? rol;
-
-//            public EtkinliklerKontrol(int? kullaniciId = null, int? rol = null)
-//            {
-//                InitializeComponent();
-//                this.Dock = DockStyle.Fill;
-
-//                this.aktifKullaniciId = kullaniciId;
-//                this.rol = rol;
-//            }
-
-//            private void Yukle()
-//            {
-//                using (var db = new AppDbContext())
-//                {
-//                    var veriler = db.Etkinlikler.AsQueryable();
-
-//                    if (rol == 3) // organizatör ise
-//                    {
-//                        veriler = veriler.Where(x => x.KullaniciID == aktifKullaniciId);
-//                    }
-
-//                    dgvEtkinlikler.DataSource = veriler.ToList();
-//                }
-//            }
-
-
-//        /// </summary>
-//        private Label lblBaslik;
-//        private Guna2TextBox txtArama;
-//        private Guna2Button btnYeniEkle;
-//        private Guna2DataGridView dgvEtkinlikler;
-//        private Guna2Button btnExcel;
-
-//        public EtkinliklerKontrol()
-//        {
-//            InitializeComponent();
-//            this.Dock = DockStyle.Fill;
-//            this.BackColor = Color.White;
-//            ArayuzOlustur();
-//        }
-
-//        private void ArayuzOlustur()
-//        {
-//            // Başlık
-//            lblBaslik = new Label()
-//            {
-//                Text = "ETKİNLİKLER",
-//                Font = new Font("Segoe UI", 20, FontStyle.Bold),
-//                Location = new Point(30, 20),
-//                AutoSize = true
-//            };
-//            this.Controls.Add(lblBaslik);
-
-//            // Arama kutusu
-//            txtArama = new Guna2TextBox()
-//            {
-//                PlaceholderText = "Etkinlik adına göre ara",
-//                Size = new Size(320, 40),
-//                Location = new Point(30, 80),
-//                Font = new Font("Segoe UI", 10),
-//                BorderRadius = 10
-//            };
-//            this.Controls.Add(txtArama);
-
-//            // Yeni Etkinlik Ekle Butonu
-//            btnYeniEkle = new Guna2Button()
-//            {
-//                Text = "+ Yeni Etkinlik Ekle",
-//                Size = new Size(200, 40),
-//                Location = new Point(370, 80),
-//                BorderRadius = 10,
-//                FillColor = Color.FromArgb(0, 123, 255),
-//                ForeColor = Color.White,
-//                Font = new Font("Segoe UI", 10, FontStyle.Bold)
-//            };
-//            this.Controls.Add(btnYeniEkle);
-
-//            // DataGridView
-//            dgvEtkinlikler = new Guna2DataGridView()
-//            {
-//                Location = new Point(30, 140),
-//                Size = new Size(this.Width - 60, 300),
-//                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-//                ReadOnly = true,
-//                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
-//                ColumnHeadersHeight = 40,
-//                AllowUserToAddRows = false,
-//                AllowUserToResizeRows = false,
-//                ScrollBars = ScrollBars.Both,
-//                RowTemplate = { Height = 40 },
-//                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-//                AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.WhiteSmoke }
-//            };
-//            dgvEtkinlikler.CellPainting += DgvEtkinlikler_CellPainting;
-//            this.Controls.Add(dgvEtkinlikler);
-
-//            // Kolonlar
-//            dgvEtkinlikler.Columns.Add("EtkinlikAdi", "Etkinlik Adı");
-//            dgvEtkinlikler.Columns[0].Width = 160;
-
-//            dgvEtkinlikler.Columns.Add("Turu", "Türü");
-//            dgvEtkinlikler.Columns[1].Width = 100;
-
-//            dgvEtkinlikler.Columns.Add("Sure", "Süresi");
-//            dgvEtkinlikler.Columns[2].Width = 80;
-
-//            dgvEtkinlikler.Columns.Add("Gorsel", "Görsel");
-//            dgvEtkinlikler.Columns[3].Width = 120;
-
-//            dgvEtkinlikler.Columns.Add("Tarih", "Tarih");
-//            dgvEtkinlikler.Columns[4].Width = 110;
-
-//            dgvEtkinlikler.Columns.Add("Saat", "Saat");
-//            dgvEtkinlikler.Columns[5].Width = 80;
-
-//            DataGridViewButtonColumn editColumn = new DataGridViewButtonColumn();
-//            editColumn.HeaderText = "";
-//            editColumn.Text = "✏️";
-//            editColumn.UseColumnTextForButtonValue = true;
-//            editColumn.Width = 40;
-//            dgvEtkinlikler.Columns.Add(editColumn);
-
-//            DataGridViewButtonColumn deleteColumn = new DataGridViewButtonColumn();
-//            deleteColumn.HeaderText = "";
-//            deleteColumn.Text = "🗑️";
-//            deleteColumn.UseColumnTextForButtonValue = true;
-//            deleteColumn.Width = 40;
-//            dgvEtkinlikler.Columns.Add(deleteColumn);
-
-//            // Excel'e Aktar Butonu
-//            btnExcel = new Guna2Button()
-//            {
-//                Text = "Excel'e Aktar",
-//                Location = new Point(30, 460),
-//                Size = new Size(150, 40),
-//                BorderRadius = 10,
-//                FillColor = Color.Black,
-//                ForeColor = Color.White,
-//                Font = new Font("Segoe UI", 9, FontStyle.Bold),
-//                Anchor = AnchorStyles.Bottom | AnchorStyles.Left
-//            };
-//            this.Controls.Add(btnExcel);
-
-//            // Örnek Veriler
-//            dgvEtkinlikler.Rows.Add("Rock Festivali", "Konser", "120 dk", "afis.jpg", "15.07.2025", "20:00");
-//            dgvEtkinlikler.Rows.Add("Aile Arasında", "Tiyatro", "100 dk", "aile.jpg", "17.07.2025", "18:30");
-//        }
-
-//        // HEADER RENKLENDİRME METODU
-//        private void DgvEtkinlikler_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
-//        {
-//            if (e.RowIndex == -1 && e.ColumnIndex >= 0)
-//            {
-//                e.PaintBackground(e.ClipBounds, true);
-//                e.PaintContent(e.ClipBounds);
-
-//                Color bgColor = Color.White;
-
-//                switch (e.ColumnIndex)
-//                {
-//                    case 0: bgColor = Color.FromArgb(255, 64, 129); break;     // Etkinlik Adı
-//                    case 1: bgColor = Color.FromArgb(33, 150, 243); break;     // Türü
-//                    case 2: bgColor = Color.FromArgb(255, 152, 0); break;      // Süresi
-//                    case 3: bgColor = Color.FromArgb(156, 39, 176); break;     // Görsel
-//                    case 4: bgColor = Color.FromArgb(0, 200, 83); break;       // Tarih
-//                    case 5: bgColor = Color.FromArgb(121, 85, 72); break;      // Saat
-//                    default: bgColor = Color.Gray; break;                      // Edit/Sil
-//                }
-
-//                using (SolidBrush brush = new SolidBrush(bgColor))
-//                {
-//                    e.Graphics.FillRectangle(brush, e.CellBounds);
-//                }
-
-//                TextRenderer.DrawText(e.Graphics, e.FormattedValue.ToString(),
-//                    dgvEtkinlikler.ColumnHeadersDefaultCellStyle.Font,
-//                    e.CellBounds, Color.White,
-//                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-
-//                e.Handled = true;
-//            }
-//        }private void EtkinliklerKontrol_Load(object sender, EventArgs e)
-//        {
-//            if (TemaYonetici.AktifTema == "Koyu")
-//            {
-//                this.BackColor = Color.FromArgb(120, 120, 120);
-//            }
-//            else
-//            {
-//                this.BackColor = Color.White;
-//            }
-//        }
-//    }
-//}

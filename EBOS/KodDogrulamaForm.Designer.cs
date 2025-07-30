@@ -1,6 +1,6 @@
 ﻿namespace EBOS
 {
-    partial class KayitForm
+    partial class KodDogrulamaForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,19 +29,17 @@
         private void InitializeComponent()
         {
             SuspendLayout();
-            // KayitForm
-
+            // 
+            // KodDogrulamaForm
+            // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(914, 600);
-            Margin = new Padding(3, 4, 3, 4);
-            Name = "KayitForm";
-            Text = "KayitForm";
-            Load += KayitForm_Load_1;
-
+            ClientSize = new Size(800, 450);
+            Name = "KodDogrulamaForm";
+            Text = "KodDogrulamaForm";
+            Load += KodDogrulamaForm_Load;
             ResumeLayout(false);
         }
-
 
         #endregion
     }

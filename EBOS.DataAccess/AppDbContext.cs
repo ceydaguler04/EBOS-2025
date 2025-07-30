@@ -17,12 +17,14 @@ namespace EBOS.DataAccess
         public DbSet<Rapor> Raporlar { get; set; }
         public DbSet<Sehir> Sehirler { get; set; }
         public DbSet<Ilce> Ilceler { get; set; }
+        public DbSet<Mekan> Mekanlar { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Buraya MySQL bağlantı cümleni yazacaksın
             optionsBuilder.UseMySql("server=localhost;database=EBOSDB;user=root;password=16012004;",
+
                 new MySqlServerVersion(new Version(8, 0, 36))
             );
         }

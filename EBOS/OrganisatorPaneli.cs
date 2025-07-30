@@ -22,7 +22,7 @@ namespace EBOS
         private Panel mainContentPanel;
         private ContextMenuStrip contextMenu;
 
-        public OrganisatorPaneli(string kullaniciAdi = "Organizatör")
+        public OrganisatorPaneli(string eposta, string kullaniciAdi = "Organizatör")
         {
             InitializeComponent();
             this.Text = "Organizatör Paneli";

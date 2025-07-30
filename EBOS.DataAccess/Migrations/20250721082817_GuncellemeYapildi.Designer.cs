@@ -4,6 +4,7 @@ using EBOS.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250721082817_GuncellemeYapildi")]
+    partial class GuncellemeYapildi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,34 +105,27 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<string>("Aciklama")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("EtkinlikAdi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("GorselYolu")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<string>("GorselYolu")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("IlceID")
+                    b.Property<int>("IlceID")
                         .HasColumnType("int");
 
-                    b.Property<int>("KullaniciID")
+                    b.Property<int?>("KullaniciID")
                         .HasColumnType("int");
-
-                    b.Property<int?>("MekanID")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("Saat")
-                        .HasColumnType("time(6)");
 
                     b.Property<int>("SureDakika")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("Tarih")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("TurID")
                         .HasColumnType("int");
@@ -139,8 +135,6 @@ namespace EBOS.DataAccess.Migrations
                     b.HasIndex("IlceID");
 
                     b.HasIndex("KullaniciID");
-
-                    b.HasIndex("MekanID");
 
                     b.HasIndex("TurID");
 
@@ -275,56 +269,6 @@ namespace EBOS.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Kullanicilar");
-                });
-
-            modelBuilder.Entity("EBOS.Entities.Mekan", b =>
-                {
-                    b.Property<int>("MekanID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("MekanID"));
-
-                    b.Property<string>("Ad")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("Adres")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
-
-                    b.Property<double?>("Boylam")
-                        .HasColumnType("double");
-
-                    b.Property<double?>("Enlem")
-                        .HasColumnType("double");
-
-                    b.Property<string>("Ilce")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int>("IlceID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MekanApiId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Sehir")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Semt")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.HasKey("MekanID");
-
-                    b.ToTable("Mekanlar");
                 });
 
             modelBuilder.Entity("EBOS.Entities.Rapor", b =>
@@ -475,17 +419,13 @@ namespace EBOS.DataAccess.Migrations
                 {
                     b.HasOne("EBOS.Entities.Ilce", "Ilce")
                         .WithMany("Etkinlikler")
-                        .HasForeignKey("IlceID");
-
-                    b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
-                        .WithMany("Etkinlikler")
-                        .HasForeignKey("KullaniciID")
+                        .HasForeignKey("IlceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EBOS.Entities.Mekan", "Mekan")
+                    b.HasOne("EBOS.Entities.Kullanici", null)
                         .WithMany("Etkinlikler")
-                        .HasForeignKey("MekanID");
+                        .HasForeignKey("KullaniciID");
 
                     b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
                         .WithMany("Etkinlikler")
@@ -496,10 +436,6 @@ namespace EBOS.DataAccess.Migrations
                     b.Navigation("EtkinlikTuru");
 
                     b.Navigation("Ilce");
-
-                    b.Navigation("Kullanici");
-
-                    b.Navigation("Mekan");
                 });
 
             modelBuilder.Entity("EBOS.Entities.Ilce", b =>
@@ -571,11 +507,6 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Navigation("Degerlendirmeler");
 
-                    b.Navigation("Etkinlikler");
-                });
-
-            modelBuilder.Entity("EBOS.Entities.Mekan", b =>
-                {
                     b.Navigation("Etkinlikler");
                 });
 

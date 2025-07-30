@@ -61,6 +61,7 @@ namespace EBOS
             btnYeniKullanici.ForeColor = Color.White;
             btnYeniKullanici.Dock = DockStyle.Bottom;
             btnYeniKullanici.Height = 40;
+            btnYeniKullanici.Click += btnYeniKullanici_Click;
 
             // Sil butonu
             btnSil = new Button();
@@ -102,6 +103,7 @@ namespace EBOS
                 using (var context = new AppDbContext())
                 {
                     var liste = context.Kullanicilar
+                        .Where(k => k.Rol != "Yönetici")
                         .Select(k => new
                         {
                             k.KullaniciID,
@@ -136,22 +138,47 @@ namespace EBOS
             string arama = txtArama.Text.ToLower();
             KullaniciListesiniYukle(arama);
         }
+        private void btnYeniKullanici_Click(object sender, EventArgs e)
+        {
+            var form = new KullaniciEkleForm();
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                KullaniciListesiniYukle(); // listeyi yeniden getir
+            }
+        }
 
         private void BtnSil_Click(object sender, EventArgs e)
         {
             if (dgvKullanicilar.SelectedRows.Count > 0)
             {
-                int id = (int)dgvKullanicilar.SelectedRows[0].Cells["KullaniciID"].Value;
-                using (var context = new AppDbContext())
+                string adSoyad = dgvKullanicilar.SelectedRows[0].Cells["AdSoyad"].Value.ToString();
+                DialogResult sonuc = MessageBox.Show(
+                    $"{adSoyad} adlı kullanıcıyı silmek istediğinize emin misiniz?",
+                    "Kullanıcı Sil",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (sonuc == DialogResult.Yes)
                 {
-                    var silinecek = context.Kullanicilar.Find(id);
-                    if (silinecek != null)
+                    int id = (int)dgvKullanicilar.SelectedRows[0].Cells["KullaniciID"].Value;
+
+                    using (var context = new AppDbContext())
                     {
-                        context.Kullanicilar.Remove(silinecek);
-                        context.SaveChanges();
-                        KullaniciListesiniYukle();
+                        var silinecek = context.Kullanicilar.Find(id);
+                        if (silinecek != null)
+                        {
+                            context.Kullanicilar.Remove(silinecek);
+                            context.SaveChanges();
+                            KullaniciListesiniYukle();
+                        }
                     }
+
+                    MessageBox.Show("Kullanıcı başarıyla silindi.", "Silme Tamamlandı", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Lütfen silmek için bir kullanıcı seçin.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -231,194 +258,17 @@ namespace EBOS
         private void SayacGuncelle()
         {
             int toplam = dgvKullanicilar.Rows.Count;
-            int yonetici = dgvKullanicilar.Rows.Cast<DataGridViewRow>()
-                .Count(r => r.Cells["Rol"].Value?.ToString() == "Yönetici");
 
-            lblSayac.Text = $"Toplam Kullanıcı: {toplam} | Yönetici: {yonetici}";
+            int kullaniciSayisi = dgvKullanicilar.Rows
+                .Cast<DataGridViewRow>()
+                .Count(r => r.Cells["Rol"].Value?.ToString() == "Kullanıcı");
+
+            int organizatorSayisi = dgvKullanicilar.Rows
+                .Cast<DataGridViewRow>()
+                .Count(r => r.Cells["Rol"].Value?.ToString() == "Organizatör");
+
+            lblSayac.Text = $"Toplam: {toplam} | Kullanıcı: {kullaniciSayisi} | Organizatör: {organizatorSayisi}";
         }
+
     }
 }
-
-//using System;
-//using System.Drawing;
-//using System.Linq;
-//using System.Windows.Forms;
-//using EBOS.DataAccess;
-//using Guna.UI2.WinForms;
-
-//namespace EBOS
-//{
-//    public partial class KullanicilarKontrol : UserControl
-//    {
-//        private Guna2DataGridView dgvKullanicilar;
-//        private TextBox txtArama;
-//        private Button btnYeniKullanici, btnSil;
-//        private Label lblSayac;
-//        private Button btnExcelAktar;
-
-//        public KullanicilarKontrol()
-//        {
-//            this.Dock = DockStyle.Fill;
-//            this.BackColor = Color.White;
-
-//            // Arama kutusu
-//            txtArama = new TextBox();
-//            txtArama.PlaceholderText = "Ad, Soyad veya E-posta ara...";
-//            txtArama.Dock = DockStyle.Top;
-//            txtArama.Font = new Font("Segoe UI", 10);
-//            txtArama.TextChanged += TxtArama_TextChanged;
-
-//            // DataGridView
-//            dgvKullanicilar = new Guna2DataGridView();
-//            dgvKullanicilar.Dock = DockStyle.Fill;
-//            dgvKullanicilar.ReadOnly = true;
-//            dgvKullanicilar.AllowUserToAddRows = false;
-//            dgvKullanicilar.AllowUserToDeleteRows = false;
-//            dgvKullanicilar.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-//            dgvKullanicilar.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-//            dgvKullanicilar.EnableHeadersVisualStyles = false;
-//            dgvKullanicilar.BackgroundColor = Color.White;
-
-//            dgvKullanicilar.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-//            dgvKullanicilar.ThemeStyle.HeaderStyle.ForeColor = Color.Black;
-//            dgvKullanicilar.ThemeStyle.RowsStyle.BackColor = Color.WhiteSmoke;
-//            dgvKullanicilar.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(203, 228, 222);
-
-//            // Sil butonu
-//            btnSil = new Button();
-//            btnSil.Text = "Seçili Kullanıcıyı Sil";
-//            btnSil.BackColor = Color.IndianRed;
-//            btnSil.ForeColor = Color.White;
-//            btnSil.Dock = DockStyle.Bottom;
-//            btnSil.Height = 40;
-//            btnSil.Click += BtnSil_Click;
-
-//            // Yeni kullanıcı butonu
-//            btnYeniKullanici = new Button();
-//            btnYeniKullanici.Text = "Yeni Kullanıcı Ekle";
-//            btnYeniKullanici.BackColor = Color.DarkSeaGreen;
-//            btnYeniKullanici.ForeColor = Color.White;
-//            btnYeniKullanici.Dock = DockStyle.Bottom;
-//            btnYeniKullanici.Height = 40;
-
-//            // Sayaç etiketi
-//            lblSayac = new Label();
-//            lblSayac.Text = "";
-//            lblSayac.Dock = DockStyle.Bottom;
-//            lblSayac.TextAlign = ContentAlignment.MiddleLeft;
-//            lblSayac.Font = new Font("Segoe UI", 9, FontStyle.Italic);
-//            lblSayac.Height = 30;
-
-//            // Kontrolleri sırayla ekle
-//            this.Controls.Add(dgvKullanicilar);
-//            this.Controls.Add(txtArama);
-//            this.Controls.Add(lblSayac);
-//            this.Controls.Add(btnYeniKullanici);
-//            this.Controls.Add(btnSil);
-
-//            this.Load += KullanicilarKontrol_Load;
-//        }
-
-//        private void KullanicilarKontrol_Load(object? sender, EventArgs e)
-//        {
-//            KullaniciListesiniYukle();
-//        }
-
-//        private void KullaniciListesiniYukle(string? filtre = null)
-//        {
-//            try
-//            {
-//                using (var context = new AppDbContext())
-//                {
-//                    var liste = context.Kullanicilar
-//                        .Select(k => new
-//                        {
-//                            k.KullaniciID,
-//                            k.AdSoyad,
-//                            k.Eposta,
-//                            k.Rol,
-//                            YorumSayisi = k.Degerlendirmeler.Count,
-//                            KatildigiEtkinlikSayisi = k.Biletler
-//                                .Select(b => b.Seans.EtkinlikID)
-//                                .Distinct()
-//                                .Count()
-//                        })
-//                        .Where(x => filtre == null ||
-//                                    x.AdSoyad.ToLower().Contains(filtre) ||
-//                                    x.Eposta.ToLower().Contains(filtre))
-//                        .ToList();
-
-//                    dgvKullanicilar.DataSource = liste;
-//                    BasliklariRenklendir();
-//                    RolRenkleriUygula();
-//                    SayacGuncelle();
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                MessageBox.Show("Listeleme hatası: " + ex.Message);
-//            }
-//        }
-
-//        private void TxtArama_TextChanged(object sender, EventArgs e)
-//        {
-//            string arama = txtArama.Text.ToLower();
-//            KullaniciListesiniYukle(arama);
-//        }
-
-//        private void BtnSil_Click(object sender, EventArgs e)
-//        {
-//            if (dgvKullanicilar.SelectedRows.Count > 0)
-//            {
-//                int id = (int)dgvKullanicilar.SelectedRows[0].Cells["KullaniciID"].Value;
-//                using (var context = new AppDbContext())
-//                {
-//                    var silinecek = context.Kullanicilar.Find(id);
-//                    if (silinecek != null)
-//                    {
-//                        context.Kullanicilar.Remove(silinecek);
-//                        context.SaveChanges();
-//                        KullaniciListesiniYukle();
-//                    }
-//                }
-//            }
-//        }
-
-//        private void BasliklariRenklendir()
-//        {
-//            Color[] renkler = {
-//                Color.FromArgb(255, 179, 186), // KullaniciID
-//                Color.FromArgb(255, 223, 186), // AdSoyad
-//                Color.FromArgb(255, 255, 186), // Eposta
-//                Color.FromArgb(186, 255, 201), // Rol
-//                Color.LightSkyBlue,            // YorumSayisi
-//                Color.LightCyan                // KatildigiEtkinlikSayisi
-//            };
-
-//            for (int i = 0; i < dgvKullanicilar.Columns.Count && i < renkler.Length; i++)
-//            {
-//                dgvKullanicilar.Columns[i].HeaderCell.Style.BackColor = renkler[i];
-//            }
-//        }
-
-//        private void RolRenkleriUygula()
-//        {
-//            foreach (DataGridViewRow row in dgvKullanicilar.Rows)
-//            {
-//                if (row.Cells["Rol"].Value?.ToString() == "Yönetici")
-//                    row.DefaultCellStyle.BackColor = Color.LightSalmon;
-//                else
-//                    row.DefaultCellStyle.BackColor = Color.White;
-//            }
-//        }
-
-//        private void SayacGuncelle()
-//        {
-//            int toplam = dgvKullanicilar.Rows.Count;
-//            int yonetici = dgvKullanicilar.Rows.Cast<DataGridViewRow>()
-//                .Count(r => r.Cells["Rol"].Value?.ToString() == "Yönetici");
-
-//            lblSayac.Text = $"Toplam Kullanıcı: {toplam} | Yönetici: {yonetici}";
-//        }
-//    }
-//}

@@ -140,5 +140,10 @@ namespace EBOS
             Random rnd = new Random();
             return new string(Enumerable.Repeat(karakterler, uzunluk).Select(s => s[rnd.Next(s.Length)]).ToArray());
         }
+
+        private void SifreSifirlamaForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -6,7 +6,6 @@ using System.Windows.Forms;
 public static class TemaYonetici
 {
     public static string AktifTema { get; set; } = "Yesil";
-
     public static Color SeciliButonRengi()
     {
         return AktifTema switch
@@ -29,7 +28,6 @@ public static class TemaYonetici
     public static void Uygula(Form form)
     {
         if (form is null) return;
-
         Color topColor, leftColor, backColor;
 
         switch (AktifTema)
@@ -59,8 +57,10 @@ public static class TemaYonetici
                 else if (panel.Location.X == 0 && panel.Width < 300)
                     panel.FillColor = leftColor;
             }
+
         }
     }
+
     public static void ContextMenuRenkleriUygula(ContextMenuStrip menu)
     {
         if (menu == null) return;
@@ -84,5 +84,4 @@ public static class TemaYonetici
             _ => Color.FromArgb(110, 135, 55) // Yeşil hover
         };
     }
-
 }

@@ -4,6 +4,7 @@ using EBOS.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250724075110_VeritabaniGuncelleme_Temmuz2025")]
+    partial class VeritabaniGuncelleme_Temmuz2025
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,24 +105,26 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<string>("Aciklama")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("EtkinlikAdi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("GorselYolu")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<string>("GorselYolu")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("IlceID")
+                    b.Property<int>("IlceID")
                         .HasColumnType("int");
 
-                    b.Property<int>("KullaniciID")
+                    b.Property<int?>("KullaniciID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MekanID")
+                    b.Property<int>("MekanID")
                         .HasColumnType("int");
 
                     b.Property<TimeSpan>("Saat")
@@ -306,12 +311,6 @@ namespace EBOS.DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<int>("IlceID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MekanApiId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Sehir")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -475,17 +474,19 @@ namespace EBOS.DataAccess.Migrations
                 {
                     b.HasOne("EBOS.Entities.Ilce", "Ilce")
                         .WithMany("Etkinlikler")
-                        .HasForeignKey("IlceID");
-
-                    b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
-                        .WithMany("Etkinlikler")
-                        .HasForeignKey("KullaniciID")
+                        .HasForeignKey("IlceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EBOS.Entities.Kullanici", null)
+                        .WithMany("Etkinlikler")
+                        .HasForeignKey("KullaniciID");
+
                     b.HasOne("EBOS.Entities.Mekan", "Mekan")
                         .WithMany("Etkinlikler")
-                        .HasForeignKey("MekanID");
+                        .HasForeignKey("MekanID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
                         .WithMany("Etkinlikler")
@@ -496,8 +497,6 @@ namespace EBOS.DataAccess.Migrations
                     b.Navigation("EtkinlikTuru");
 
                     b.Navigation("Ilce");
-
-                    b.Navigation("Kullanici");
 
                     b.Navigation("Mekan");
                 });
