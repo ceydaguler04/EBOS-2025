@@ -30,7 +30,7 @@ namespace EBOS
             dgvBiletler = new DataGridView()
             {
                 Location = new Point(30, 70),
-                Size = new Size(800, 400),
+                Size = new Size(750, 380),
                 ReadOnly = true,
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
@@ -44,6 +44,20 @@ namespace EBOS
             dgvBiletler.Columns.Add("Tarih", "Tarih");
             dgvBiletler.Columns.Add("Koltuk", "Koltuk");
             dgvBiletler.Columns.Add("Fiyat", "Fiyat (₺)");
+            dgvBiletler.Columns.Add("Durum", "Durum");
+
+            // QR butonu kolonu
+            DataGridViewButtonColumn btnQr = new DataGridViewButtonColumn
+            {
+                HeaderText = "QR Kod",
+                Text = "QR Gör",
+                UseColumnTextForButtonValue = true,
+                Name = "BtnQrKod" // <<< Bunu ekledik
+            };
+            dgvBiletler.Columns.Add(btnQr);
+
+
+            dgvBiletler.CellClick += DgvBiletler_CellClick;
 
             BiletleriYukle();
         }
@@ -69,15 +83,39 @@ namespace EBOS
                     var tur = db.EtkinlikTurleri.FirstOrDefault(t => t.TurID == etkinlik.TurID);
                     var koltuk = db.Koltuklar.FirstOrDefault(k => k.KoltukID == bilet.KoltukID);
 
-                    dgvBiletler.Rows.Add(
+                    string durum = (seans.Tarih.Date < DateTime.Today) ? "Pasif" : "Aktif";
+
+                    int rowIndex = dgvBiletler.Rows.Add(
                         tur?.TurAdi ?? "Bilinmiyor",
                         etkinlik?.EtkinlikAdi ?? "Etkinlik Yok",
                         seans?.Tarih.ToShortDateString() ?? "-",
                         koltuk?.KoltukNo ?? "-",
-                        bilet.Fiyat.ToString("0.00")
+                        bilet.Fiyat.ToString("0.00"),
+                        durum
                     );
+
+                    // Pasif biletler gri olsun
+                    if (durum == "Pasif")
+                        dgvBiletler.Rows[rowIndex].DefaultCellStyle.BackColor = Color.LightGray;
                 }
             }
         }
+
+        private void DgvBiletler_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == dgvBiletler.Columns["BtnQrKod"].Index)
+            {
+                string etkinlikAdi = dgvBiletler.Rows[e.RowIndex].Cells["EtkinlikAdi"].Value?.ToString();
+                string koltukNo = dgvBiletler.Rows[e.RowIndex].Cells["Koltuk"].Value?.ToString();
+
+                if (!string.IsNullOrEmpty(etkinlikAdi) && !string.IsNullOrEmpty(koltukNo))
+                {
+                    FormQrGoster qrForm = new FormQrGoster(etkinlikAdi, koltukNo);
+                    qrForm.ShowDialog();
+                }
+            }
+        }
+
     }
 }
+

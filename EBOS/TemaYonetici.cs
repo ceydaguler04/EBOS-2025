@@ -108,7 +108,7 @@ public static class TemaYonetici
         };
 
         menu.ForeColor = Color.White;
-        menu.Renderer = new CustomColorRenderer(); // varsa özel renderer'ı da yeniden uygula
+        menu.Renderer = new CustomColorRenderer(); // özel renderer uygulanıyor
     }
 
     public static Color ContextMenuHoverRenk()
@@ -119,5 +119,27 @@ public static class TemaYonetici
             "Koyu" => Color.FromArgb(80, 80, 80),
             _ => Color.FromArgb(110, 135, 55) // Yeşil hover
         };
+    }
+}
+
+// ✅ EKLENMESİ GEREKEN SINIF
+public class CustomColorRenderer : ToolStripProfessionalRenderer
+{
+    protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+    {
+        Color hoverColor = TemaYonetici.ContextMenuHoverRenk();
+
+        if (e.Item.Selected)
+        {
+            Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
+            using (SolidBrush brush = new SolidBrush(hoverColor))
+            {
+                e.Graphics.FillRectangle(brush, rect);
+            }
+        }
+        else
+        {
+            base.OnRenderMenuItemBackground(e);
+        }
     }
 }

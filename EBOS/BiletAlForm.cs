@@ -1,105 +1,96 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using EBOS.DataAccess;
 using EBOS.Entities;
+using Guna.UI2.WinForms;
 
 namespace EBOS
 {
     public partial class BiletAlForm : Form
     {
-        private string kullaniciEposta;
-        private string kategori;
+        private readonly string _etkinlikAdi;
+        private readonly string _kullaniciEposta;
+        private List<Koltuk> _koltuklar;
+        private Guna2Panel _koltukPanel;
+        private Koltuk _seciliKoltuk;
 
-        private ComboBox cmbSeans;
-        private ComboBox cmbKoltuk;
-        private NumericUpDown nudAdet;
-        private CheckBox chkKampanya;
-        private Label lblFiyat;
-
-        public BiletAlForm(string kategori, string eposta)
+        public BiletAlForm(string etkinlikAdi, string kullaniciEposta)
         {
-            this.kategori = kategori;
-            this.kullaniciEposta = eposta;
+            _etkinlikAdi = etkinlikAdi;
+            _kullaniciEposta = kullaniciEposta;
 
-            this.Text = "Bilet Satın Al";
-            this.Size = new Size(500, 450);
+            InitializeComponent();
+            this.Text = "Koltuk Seçimi";
+            this.Size = new Size(800, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
 
+            YukleKoltuklar();
             ArayuzOlustur();
+        }
+
+        private void YukleKoltuklar()
+        {
+            using (var db = new AppDbContext())
+            {
+                _koltuklar = db.Koltuklar.ToList();
+            }
         }
 
         private void ArayuzOlustur()
         {
-            using (var db = new AppDbContext())
+            _koltukPanel = new Guna2Panel()
             {
-                var seanslar = db.Seanslar
-                    .Where(s => s.Etkinlik.EtkinlikTuru.TurAdi == kategori)
-                    .ToList();
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20),
+                AutoScroll = true,
+                FillColor = Color.White
+            };
+            this.Controls.Add(_koltukPanel);
 
-                cmbSeans.DataSource = seanslar;
-                cmbSeans.DisplayMember = "SeansAdi";
-                cmbSeans.ValueMember = "SeansID";
-            }
-        }
+            int satir = 10;
+            int sutun = 10;
+            int koltukGenislik = 60;
+            int koltukYukseklik = 40;
+            int aralik = 10;
 
-        private void KoltuklariYukle()
-        {
-            using (var db = new AppDbContext())
+            for (int i = 0; i < satir; i++)
             {
-                var koltuklar = db.Koltuklar.ToList();
-                cmbKoltuk.DataSource = koltuklar;
-                cmbKoltuk.DisplayMember = "KoltukNo";
-                cmbKoltuk.ValueMember = "KoltukID";
-            }
-        }
-
-        private void FiyatGuncelle()
-        {
-            decimal birimFiyat = chkKampanya.Checked ? 50 : 100;
-            decimal toplam = birimFiyat * nudAdet.Value;
-            lblFiyat.Text = $"{toplam:0.00} ₺";
-        }
-
-        private void BtnSatinAl_Click(object sender, EventArgs e)
-        {
-            if (cmbSeans.SelectedValue == null || cmbKoltuk.SelectedValue == null)
-            {
-                MessageBox.Show("Lütfen seans ve koltuk seçiniz.", "Uyarı");
-                return;
-            }
-
-            int seansID = Convert.ToInt32(cmbSeans.SelectedValue);
-            int koltukID = Convert.ToInt32(cmbKoltuk.SelectedValue);
-            int adet = (int)nudAdet.Value;
-            bool kampanya = chkKampanya.Checked;
-
-            decimal birimFiyat = kampanya ? 50 : 100;
-
-            using (var db = new AppDbContext())
-            {
-                var kullanici = db.Kullanicilar.FirstOrDefault(k => k.Eposta.ToLower() == kullaniciEposta.ToLower());
-                if (kullanici == null)
+                for (int j = 0; j < sutun; j++)
                 {
-                    MessageBox.Show("Kullanıcı bulunamadı.", "Hata");
-                    return;
-                }
-                }
+                    int index = i * sutun + j;
+                    if (index >= _koltuklar.Count) break;
 
-                for (int i = 0; i < adet; i++)
-                {
-                    var bilet = new Bilet()
+                    var koltuk = _koltuklar[index];
+                    var btnKoltuk = new Guna2Button()
                     {
-                        KullaniciID = kullanici.KullaniciID,
-                        SeansID = seansID,
-                        KoltukID = koltukID,
-                        Fiyat = birimFiyat,
-                        KampanyaUygulandiMi = kampanya,
-                        SatinAlmaTarihi = DateTime.Now
+                        Text = koltuk.KoltukNo,
+                        Size = new Size(koltukGenislik, koltukYukseklik),
+                        Location = new Point(j * (koltukGenislik + aralik), i * (koltukYukseklik + aralik)),
+                        Tag = koltuk,
+                        BorderRadius = 5,
+                        FillColor = Color.LightGreen
                     };
-                    db.Biletler.Add(bilet);
+
+                    btnKoltuk.Click += (s, e) =>
+                    {
+                        _seciliKoltuk = (Koltuk)((Guna2Button)s).Tag;
+                        DialogResult sonuc = MessageBox.Show($"{_seciliKoltuk.KoltukNo} koltuğunu seçtiniz. Ödemeye geçilsin mi?", "Onay", MessageBoxButtons.YesNo);
+                        if (sonuc == DialogResult.Yes)
+                        {
+                            OdemeForm odeme = new OdemeForm(_etkinlikAdi, _kullaniciEposta, _seciliKoltuk.KoltukID);
+                            odeme.ShowDialog();
+                            this.Close();
+                        }
+                    };
+
+                    _koltukPanel.Controls.Add(btnKoltuk);
                 }
             }
         }
     }
 }
+
+
