@@ -85,7 +85,6 @@ public static class TemaYonetici
                 button.ForeColor = butonYaziRenk;
             }
 
-            // İçerideki panellerdeki butonları da dahil et
             foreach (Control inner in control.Controls)
             {
                 if (inner is Guna2Button innerBtn)

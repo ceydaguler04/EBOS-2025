@@ -27,7 +27,6 @@ namespace EBOS
                 Location = new Point(30, 30),
                 AutoSize = true
             };
-            this.Controls.Add(lbl);
 
             Guna2Button btnBiletAl = new Guna2Button()
             {
