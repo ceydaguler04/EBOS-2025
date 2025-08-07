@@ -22,7 +22,6 @@ namespace EBOS
             _etkinlikAdi = etkinlikAdi;
             _kullaniciEposta = kullaniciEposta;
 
-            InitializeComponent();
             this.Text = "Koltuk Seçimi";
             this.Size = new Size(800, 600);
             this.StartPosition = FormStartPosition.CenterScreen;

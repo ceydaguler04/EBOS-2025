@@ -26,11 +26,6 @@ namespace EBOS
         private Label lblBaslik;
         private Guna2Button btnOdemeYap;
 
-        public OdemeForm(string etkinlikAdi, string kullaniciEposta, int koltukID)
-        {
-            _etkinlikAdi = etkinlikAdi;
-            _kullaniciEposta = kullaniciEposta;
-            _koltukID = koltukID;
 
             InitializeComponent();
             this.Text = "İyzico Ödeme Simülasyonu";

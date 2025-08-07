@@ -29,9 +29,7 @@ namespace EBOS
 
 
             this.seansId = seansId;
-
             this.etkinlikAdi = etkinlikAdi;
-
             this.kullaniciEposta = eposta;
             InitializeComponent();
             InitLayout();
