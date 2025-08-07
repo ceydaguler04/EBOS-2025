@@ -72,7 +72,8 @@ namespace EBOS
             var txtSifre = new Guna2TextBox() { PlaceholderText = "Şifre", Location = new Point(40, 170), Size = new Size(280, 40), PasswordChar = '*', BorderRadius = 6 };
             var txtTekrar = new Guna2TextBox() { PlaceholderText = "Şifre (Tekrar)", Location = new Point(40, 220), Size = new Size(280, 40), PasswordChar = '*', BorderRadius = 6 };
             var cmbRol = new Guna2ComboBox() { Location = new Point(40, 270), Size = new Size(280, 40), DropDownStyle = ComboBoxStyle.DropDownList };
-            cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici" });
+            cmbRol.Items.AddRange(new string[] { "Kullanıcı", "Yönetici", "Organizatör" });
+
 
             var btnKayit = new Guna2Button()
             {
@@ -136,6 +137,11 @@ namespace EBOS
             {
                 txtAdSoyad, txtEposta, txtSifre, txtTekrar, cmbRol, btnKayit, linkGiris
             });
+        }
+
+        private void KayitForm_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -166,13 +166,17 @@ namespace EBOS
 
                     string rol = kullanici.Rol?.ToLowerInvariant();
 
-                    if (rol == "yonetici")
+                    if (rol == "yonetici" || rol == "yönetici")
                     {
-                        new YoneticiPaneli().Show();
+                        new YoneticiPaneli(kullanici.Eposta).Show();
                     }
                     else if (rol == "kullanici" || rol == "kullanıcı")
                     {
                         new KullaniciPaneli(kullanici.Eposta).Show();
+                    }
+                    else if (rol == "organisator" || rol == "organizatör")
+                    {
+                        new OrganisatorPaneli(kullanici.Eposta).Show();
                     }
                     else
                     {

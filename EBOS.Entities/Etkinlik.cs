@@ -1,44 +1,60 @@
-﻿// EBOS.Entities/Etkinlik.cs
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace EBOS.Entities
 {
     public class Etkinlik
 
     {
-        public int IlceID { get; set; }
-
-        [ForeignKey("IlceID")]
-        public Ilce Ilce { get; set; }
+        public int KullaniciID { get; set; }
 
         [Key]
         public int EtkinlikID { get; set; }
 
         [Required]
-        [MaxLength(100)]
+        [MaxLength(200)]
         public string EtkinlikAdi { get; set; } = null!;
 
-        [MaxLength(500)]
+        [Column(TypeName = "TEXT")]
         public string Aciklama { get; set; } = string.Empty;
 
         [Required]
         public int TurID { get; set; }
 
         [ForeignKey("TurID")]
-        public EtkinlikTuru EtkinlikTuru { get; set; } = null!;  // Navigation property düzeltildi
+        public EtkinlikTuru EtkinlikTuru { get; set; } = null!;
 
-        [MaxLength(200)]
-        public string GorselYolu { get ; set; } = string.Empty;
+        [MaxLength(500)]  // veya daha yüksek
+        public string GorselYolu { get; set; }
+
 
         [Range(1, 500)]
         public int SureDakika { get; set; }
 
-        // İlişkili tablolar
+        [Required]
+        public DateTime Tarih { get; set; }
+
+        [Required]
+        public TimeSpan Saat { get; set; }
+
+        public int? IlceID { get; set; }
+
+        [ForeignKey("IlceID")]
+        public Ilce? Ilce { get; set; }
+
+        public int? MekanID { get; set; }
+
+        [ForeignKey("MekanID")]
+        public Mekan? Mekan { get; set; }
+
         public ICollection<Seans> Seanslar { get; set; } = new List<Seans>();
+
+        [ForeignKey("KullaniciID")]
+        public Kullanici Kullanici { get; set; } = null!;
+
         public ICollection<Degerlendirme> Degerlendirmeler { get; set; } = new List<Degerlendirme>();
     }
-}
 
+}

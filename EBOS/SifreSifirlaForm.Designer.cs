@@ -20,6 +20,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            SuspendLayout();
+            // 
+            // SifreSifirlamaForm
+            // 
+            ClientSize = new Size(282, 253);
+            Name = "SifreSifirlamaForm";
+            Load += SifreSifirlamaForm_Load;
+            ResumeLayout(false);
             // Artık tamamen boş - elle tasarım kullanılmadığı için.
         }
 

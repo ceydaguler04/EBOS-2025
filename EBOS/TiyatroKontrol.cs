@@ -1,118 +1,185 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using EBOS.DataAccess;
+using EBOS.Entities;
 using Guna.UI2.WinForms;
+using Microsoft.EntityFrameworkCore;
 
 namespace EBOS
 {
     public partial class TiyatroKontrol : UserControl
     {
-        private string kullaniciEposta;
+        private readonly string kullaniciEposta;
         private FlowLayoutPanel flpKartlar;
+        private Guna2TextBox txtArama;
 
         public TiyatroKontrol(string eposta)
         {
             kullaniciEposta = eposta;
             InitializeComponent();
-            this.Dock = DockStyle.Fill;
+            Dock = DockStyle.Fill;
             KartArayuzuOlustur();
+            TiyatroEtkinlikleriYukle();
         }
 
+        #region UI
         private void KartArayuzuOlustur()
         {
-            flpKartlar = new FlowLayoutPanel()
+            // 🔍 Arama kutusu -------------------------------------------------
+            txtArama = new Guna2TextBox
             {
-                Dock = DockStyle.Fill,
+                PlaceholderText = "Etkinlik adına göre ara",
+                Size = new Size(300, 38),
+                Location = new Point(15, 15),
+                Font = new Font("Segoe UI", 10),
+                BorderRadius = 10,
+                BorderThickness = 1,
+                BorderColor = Color.Silver,
+                FillColor = Color.Transparent,
+                BackColor = Color.Transparent
+            };
+            txtArama.TextChanged += (s, _) => TiyatroEtkinlikleriYukle(txtArama.Text);
+
+            var ustPanel = new Panel
+            {
+                Height = 70,
+                Dock = DockStyle.Top,
+                BackColor = BackColor
+            };
+            ustPanel.Controls.Add(txtArama);
+            Controls.Add(ustPanel);
+
+            // 📇 Kart alanı ---------------------------------------------------
+            flpKartlar = new FlowLayoutPanel
+            {
+                Location = new Point(5, 75),
+                Size = new Size(Width - 10, Height - 85),
                 AutoScroll = true,
-                WrapContents = true,
+
                 FlowDirection = FlowDirection.LeftToRight,
-                Padding = new Padding(15),
-                BackColor = TemaYonetici.AktifTema == "Koyu" ? Color.FromArgb(120, 120, 120) : Color.White
+                WrapContents = true,
+                Padding = new Padding(10),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
-            this.Controls.Add(flpKartlar);
+            Controls.Add(flpKartlar);
+        }
+        #endregion
 
-            var sahteEtkinlikler = new[]
-            {
-                new { EtkinlikAdi = "Tiyatro 1", Gorsel = "tiyatro1.jpg" },
-                new { EtkinlikAdi = "Tiyatro 2", Gorsel = "tiyatro2.jpg" },
-                new { EtkinlikAdi = "Tiyatro 3", Gorsel = "tiyatro3.jpg" }
-            };
+        #region Veri & Kart
+        private void TiyatroEtkinlikleriYukle(string filtre = "")
+        {
+            flpKartlar.Controls.Clear();
 
-            foreach (var etkinlik in sahteEtkinlikler)
+            using var db = new AppDbContext();
+            int kategoriId = db.EtkinlikTurleri
+                                .Where(t => t.TurAdi.ToLower() == "tiyatro")
+                                .Select(t => t.TurID)
+                                .FirstOrDefault();
+
+            var etkinlikler = db.Etkinlikler
+                                 .Include(e => e.EtkinlikTuru)
+                                 .Where(e => e.TurID == kategoriId &&
+                                        (string.IsNullOrEmpty(filtre) || e.EtkinlikAdi.ToLower().Contains(filtre.ToLower())))
+                                 .OrderByDescending(e => e.Tarih)
+                                 .ToList();
+
+            foreach (var etkinlik in etkinlikler)
+                flpKartlar.Controls.Add(KartOlustur(etkinlik));
+
+            if (etkinlikler.Count == 0)
             {
-                var kart = KartOlustur(etkinlik.EtkinlikAdi, etkinlik.Gorsel);
-                flpKartlar.Controls.Add(kart);
+                flpKartlar.Controls.Add(new Label
+                {
+                    Text = "Tiyatro etkinliği bulunamadı.",
+                    AutoSize = true,
+                    Font = new Font("Segoe UI", 11, FontStyle.Italic),
+                    ForeColor = Color.Gray,
+                    Padding = new Padding(20)
+                });
             }
         }
 
-        private Guna2Panel KartOlustur(string ad, string gorsel)
+        private Control KartOlustur(Etkinlik etkinlik)
         {
-            var kart = new Guna2Panel()
+            // 🎴 180×340, Workshop ile aynı stil ----------------------------
+            var kart = new Guna2Panel
             {
-                Size = new Size(240, 360),
-                BorderRadius = 15,
+                Size = new Size(180, 340),
+                BorderRadius = 12,
                 FillColor = Color.White,
-                Margin = new Padding(15),
-                ShadowDecoration = { Enabled = true, Depth = 10 }
+                Margin = new Padding(10),
+                ShadowDecoration = { Enabled = true, Depth = 6 }
             };
 
-            var pb = new PictureBox()
+            var pb = new PictureBox
             {
-                ImageLocation = Path.Combine(Application.StartupPath, "Gorseller", gorsel),
-                Size = new Size(220, 140),
+                SizeMode = PictureBoxSizeMode.StretchImage,
                 Location = new Point(10, 10),
-                SizeMode = PictureBoxSizeMode.StretchImage
+                Size = new Size(160, 90)
             };
+            try { pb.Load(etkinlik.GorselYolu); } catch { /* ignore */ }
+            kart.Controls.Add(pb);
 
-            var lblAd = new Label()
+            kart.Controls.Add(new Label
             {
-                Text = ad,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                Location = new Point(10, 160),
-                AutoSize = true
-            };
+                Text = etkinlik.EtkinlikAdi,
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
+                Location = new Point(10, 110),
+                Size = new Size(160, 40),
+                AutoEllipsis = true
+            });
 
-            var btnBiletAl = new Guna2Button()
+            kart.Controls.Add(new Label
+            {
+                Text = $"📅 {etkinlik.Tarih:dd.MM.yyyy}\n⏰ {etkinlik.Saat:hh\\:mm}",
+                Font = new Font("Segoe UI", 8, FontStyle.Italic),
+                ForeColor = Color.DimGray,
+                Location = new Point(10, 150),
+                Size = new Size(160, 28)
+            });
+
+            kart.Controls.Add(new Label
+            {
+                Text = $"Süre : {etkinlik.SureDakika} dk\nTür  : {etkinlik.EtkinlikTuru.TurAdi}",
+                Font = new Font("Segoe UI", 8),
+                Location = new Point(10, 180),
+                Size = new Size(160, 32)
+            });
+
+            var btnBilet = new Guna2Button
             {
                 Text = "Bilet Al",
-                Size = new Size(100, 35),
-                Location = new Point(10, 280),
+                Size = new Size(70, 28),
+                Location = new Point(10, 290),
+                Font = new Font("Segoe UI", 8, FontStyle.Bold),
                 FillColor = Color.FromArgb(40, 120, 80),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9, FontStyle.Bold),
-                BorderRadius = 6
+                BorderRadius = 5
             };
-            btnBiletAl.Click += (s, e) =>
-            {
-                var form = new BiletAlForm(ad, kullaniciEposta);
-                form.ShowDialog();
-            };
+            btnBilet.Click += (_, __) => new BiletAlForm(etkinlik.EtkinlikAdi, kullaniciEposta).ShowDialog();
+            kart.Controls.Add(btnBilet);
 
-            var btnDegerlendir = new Guna2Button()
+            var btnPuan = new Guna2Button
             {
-                Text = "Değerlendir",
-                Size = new Size(100, 35),
-                Location = new Point(120, 280),
+                Text = "Puanla",
+                Size = new Size(70, 28),
+                Location = new Point(100, 290),
+                Font = new Font("Segoe UI", 8, FontStyle.Bold),
                 FillColor = Color.FromArgb(100, 100, 160),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9, FontStyle.Bold),
-                BorderRadius = 6
+                BorderRadius = 5
             };
-            btnDegerlendir.Click += (s, e) =>
-            {
-                var form = new DegerlendirForm(ad, kullaniciEposta);
-                form.ShowDialog();
-            };
-
-            kart.Controls.Add(pb);
-            kart.Controls.Add(lblAd);
-            kart.Controls.Add(btnBiletAl);
-            kart.Controls.Add(btnDegerlendir);
+            btnPuan.Click += (_, __) => new DegerlendirForm(etkinlik.EtkinlikAdi, kullaniciEposta).ShowDialog();
+            kart.Controls.Add(btnPuan);
             return kart;
         }
+
+        #endregion
     }
 }
+
 
 

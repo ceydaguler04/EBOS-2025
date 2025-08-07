@@ -2,238 +2,213 @@
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Guna.UI2.WinForms;
 using EBOS.DataAccess;
 using EBOS.Entities;
 
 namespace EBOS
 {
+    static class KoltukRenkleri
+    {
+        public static readonly Color Bos = Color.FromArgb(59, 201, 170);   // turkuaz
+        public static readonly Color Dolu = Color.FromArgb(231, 76, 60);   // kırmızı
+        public static readonly Color Secili = Color.FromArgb(241, 196, 15); // sarı
+    }
+
     public partial class KoltukSecimForm : Form
     {
-        private string kullaniciEposta;
-        private string etkinlikAdi;
+        private readonly int seansId;
+        private readonly string kullaniciEposta;
+        private readonly string etkinlikAdi;
+
         private TableLayoutPanel salonPanel;
-        private Button seciliKoltukBtn;
+        private Button seciliBtn;
         private Koltuk seciliKoltuk;
 
-        public KoltukSecimForm(string etkinlikAdi, string eposta)
+        public KoltukSecimForm(int seansId, string etkinlikAdi, string eposta)
         {
+
+
+            this.seansId = seansId;
+
             this.etkinlikAdi = etkinlikAdi;
+
             this.kullaniciEposta = eposta;
-            this.Size = new Size(1000, 750);
-            this.Text = "Koltuk Seçimi";
-            this.StartPosition = FormStartPosition.CenterScreen;
+            InitializeComponent();
+            InitLayout();
+            OlusturLegend();
+            KoltuklariYukle();
+        }
 
-            // Perde başlık
-            Label perdeLabel = new Label()
-            {
-                Text = "PERDE",
-                Font = new Font("Segoe UI", 16, FontStyle.Bold),
-                ForeColor = Color.Black,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Dock = DockStyle.Top,
-                Height = 40
-            };
-            this.Controls.Add(perdeLabel);
+        private void InitLayout()
+        {
+            Text = "Koltuk Seçimi";
+            StartPosition = FormStartPosition.CenterScreen;
+            Size = new Size(1100, 800);
+            BackColor = Color.FromArgb(22, 33, 62); // Koyu mavi arka plan
 
-            // Salon paneli
-            salonPanel = new TableLayoutPanel()
+            // Legend paneli yukarıya
+            OlusturLegend();
+
+            // Salon koltukları için tablo
+            salonPanel = new TableLayoutPanel
             {
-                RowCount = 5,
-                ColumnCount = 11, // 10 koltuk + 1 boşluk
                 Dock = DockStyle.Fill,
-                Padding = new Padding(30),
-                BackColor = Color.White,
+                BackColor = Color.Transparent,
+                Padding = new Padding(40, 20, 40, 10),
+                RowCount = 10,
+                ColumnCount = 12,
+                CellBorderStyle = TableLayoutPanelCellBorderStyle.None
             };
 
             for (int i = 0; i < salonPanel.RowCount; i++)
-                salonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 20f));
-
+                salonPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / salonPanel.RowCount));
             for (int i = 0; i < salonPanel.ColumnCount; i++)
                 salonPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / salonPanel.ColumnCount));
 
-            this.Controls.Add(salonPanel);
+            var salonDisPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20),
+                BackColor = Color.FromArgb(22, 33, 62)
+            };
+            salonDisPanel.Controls.Add(salonPanel);
+            Controls.Add(salonDisPanel);
 
-            this.Load += KoltukSecimForm_Load;
+            // Perde label en alta
+            var perdeLabel = new Label
+            {
+                Text = "PERDE",
+                Dock = DockStyle.Bottom,
+                Height = 40,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(44, 62, 80)
+            };
+            Controls.Add(perdeLabel);
         }
 
-        private void KoltukSecimForm_Load(object sender, EventArgs e)
+        private void OlusturLegend()
         {
-            KoltuklariYukle();
+            var legend = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 50,
+                FlowDirection = FlowDirection.LeftToRight,
+                Padding = new Padding(10),
+                BackColor = Color.FromArgb(22, 33, 62)
+            };
+
+            void Add(Color color, string text)
+            {
+                legend.Controls.Add(new Panel
+                {
+                    Width = 20,
+                    Height = 20,
+                    BackColor = color,
+                    Margin = new Padding(5)
+                });
+
+                legend.Controls.Add(new Label
+                {
+                    Text = text,
+                    AutoSize = true,
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                    ForeColor = Color.White,
+                    Margin = new Padding(0, 2, 20, 0)
+                });
+            }
+
+            Add(KoltukRenkleri.Dolu, "Dolu koltuklar");
+            Add(KoltukRenkleri.Bos, "Boş koltuklar");
+            Add(KoltukRenkleri.Secili, "Seçiminiz");
+
+            Controls.Add(legend);
+            legend.BringToFront();
         }
 
         private void KoltuklariYukle()
         {
-            using (var db = new AppDbContext())
+            using var db = new AppDbContext();
+
+            var doluKoltuklar = db.Biletler
+                                  .Where(b => b.SeansID == seansId)
+                                  .Select(b => b.KoltukID)
+                                  .ToHashSet();
+
+            var koltuklar = db.Koltuklar
+                              .OrderBy(k => k.Satir)
+                              .ThenBy(k => k.Sutun)
+                              .ToList();
+
+            salonPanel.Controls.Clear();
+
+            foreach (var k in koltuklar)
             {
-                var koltuklar = db.Koltuklar.Take(100).ToList();
-                var doluKoltuklar = db.Biletler.Select(b => b.KoltukID).ToList();
-
-                salonPanel.Controls.Clear();
-
-                foreach (var k in koltuklar)
+                var btn = new Button
                 {
-                    int sutunIndex = k.Sutun >= 6 ? k.Sutun + 1 : k.Sutun; // Ortada 1 boşluk
-                    Button btn = new Button()
-                    {
-                        Text = k.KoltukNo,
-                        Tag = k,
-                        Width = 60,
-                        Height = 50,
-                        Dock = DockStyle.Fill,
-                        BackColor = doluKoltuklar.Contains(k.KoltukID) ? Color.IndianRed : Color.LightGreen,
-                        Enabled = !doluKoltuklar.Contains(k.KoltukID),
-                        FlatStyle = FlatStyle.Flat,
-                        Font = new Font("Segoe UI", 9, FontStyle.Bold)
-                    };
+                    Text = k.KoltukNo,
+                    Tag = k,
 
-                    btn.Click += (s, e) =>
-                    {
-                        if (seciliKoltukBtn != null && seciliKoltukBtn.BackColor != Color.IndianRed)
-                            seciliKoltukBtn.BackColor = Color.LightGreen;
-
-                        seciliKoltukBtn = (Button)s;
-                        seciliKoltukBtn.BackColor = Color.Orange;
-                        seciliKoltuk = (Koltuk)seciliKoltukBtn.Tag;
-                    };
-
-                    // Sadece salon boyutundaki alanlara ekle
-                    if (k.Satir <= 5 && k.Sutun <= 10)
-                        salonPanel.Controls.Add(btn, sutunIndex - 1, k.Satir - 1); // 0-based index
-                }
-
-                // Ödeme butonu
-                var odemeBtn = new Guna2Button()
-                {
-                    Text = "Ödemeye Geç",
-                    Size = new Size(220, 50),
-                    Location = new Point((this.Width - 220) / 2, this.Height - 100),
-                    Anchor = AnchorStyles.Bottom,
-                    FillColor = Color.DarkGreen,
+                    Dock = DockStyle.Fill,
+                    FlatStyle = FlatStyle.Flat,
+                    Font = new Font("Segoe UI", 9, FontStyle.Bold),
+                    BackColor = doluKoltuklar.Contains(k.KoltukID) ? KoltukRenkleri.Dolu : KoltukRenkleri.Bos,
+                    Enabled = !doluKoltuklar.Contains(k.KoltukID),
                     ForeColor = Color.White,
-                    Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                    BorderRadius = 10
+                    Margin = new Padding(2),
+                    Cursor = Cursors.Hand
                 };
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Click += Koltuk_Click;
 
-                odemeBtn.Click += (s, e) =>
-                {
-                    if (seciliKoltuk == null)
-                    {
-                        MessageBox.Show("Lütfen bir koltuk seçin.");
-                        return;
-                    }
-
-                    OdemeForm odeme = new OdemeForm(etkinlikAdi, kullaniciEposta, seciliKoltuk.KoltukID);
-                    odeme.ShowDialog();
-                    this.Close();
-                };
-
-                this.Controls.Add(odemeBtn);
-                odemeBtn.BringToFront();
+                int row = k.Satir - 1;
+                int col = k.Sutun - 1;
+                if (row < salonPanel.RowCount && col < salonPanel.ColumnCount)
+                    salonPanel.Controls.Add(btn, col, row);
             }
+        }
+
+        private void Koltuk_Click(object sender, EventArgs e)
+        {
+            var btn = (Button)sender;
+            var secilenKoltuk = (Koltuk)btn.Tag;
+
+            if (btn.BackColor == KoltukRenkleri.Secili)
+            {
+                btn.BackColor = KoltukRenkleri.Bos;
+                seciliBtn = null;
+                seciliKoltuk = null;
+                return;
+            }
+            if (seciliBtn != null)
+                seciliBtn.BackColor = KoltukRenkleri.Bos;
+
+            btn.BackColor = KoltukRenkleri.Secili;
+            seciliBtn = btn;
+            seciliKoltuk = secilenKoltuk;
+
+            DialogResult sonuc = MessageBox.Show(
+                $"{secilenKoltuk.KoltukNo} koltuğunu seçtiniz.\nÖdemeye geçmek ister misiniz?",
+                "Koltuk Seçildi",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (sonuc == DialogResult.Yes)
+            {
+
+
+                using var odeme = new OdemeForm(etkinlikAdi, kullaniciEposta, seciliKoltuk.KoltukID);
+                odeme.ShowDialog();
+
+                this.Close();
+
+
+            }
+        }
+        private void KoltukSecimForm_Load(object sender, EventArgs e)
+        {
+            KoltuklariYukle();
         }
     }
 }
-
-
-//using System;
-//using System.Drawing;
-//using System.Linq;
-//using System.Windows.Forms;
-//using Guna.UI2.WinForms;
-//using EBOS.DataAccess;
-//using EBOS.Entities;
-
-//namespace EBOS
-//{
-//    public partial class KoltukSecimForm : Form
-//    {
-//        private string kullaniciEposta;
-//        private string etkinlikAdi;
-//        private FlowLayoutPanel panel;
-//        private Button seciliKoltukBtn;
-//        private Koltuk seciliKoltuk;
-
-//        public KoltukSecimForm(string etkinlikAdi, string eposta)
-//        {
-//            this.etkinlikAdi = etkinlikAdi;
-//            this.kullaniciEposta = eposta;
-//            this.Size = new Size(700, 600);
-//            this.Text = "Koltuk Seçimi";
-//            this.StartPosition = FormStartPosition.CenterScreen;
-
-//            panel = new FlowLayoutPanel()
-//            {
-//                Dock = DockStyle.Fill,
-//                Padding = new Padding(20),
-//                AutoScroll = true,
-//                WrapContents = true
-//            };
-//            this.Controls.Add(panel);
-
-//            this.Load += KoltukSecimForm_Load;
-//        }
-
-//        private void KoltukSecimForm_Load(object sender, EventArgs e)
-//        {
-//            KoltuklariYukle();
-//        }
-
-//        private void KoltuklariYukle()
-//        {
-//            using (var db = new AppDbContext())
-//            {
-//                var koltuklar = db.Koltuklar.Take(100).ToList();
-//                foreach (var k in koltuklar)
-//                {
-//                    var btn = new Button()
-//                    {
-//                        Text = k.KoltukNo,
-//                        Size = new Size(80, 50),
-//                        BackColor = Color.LightGray,
-//                        Tag = k
-//                    };
-
-//                    btn.Click += (s, e) =>
-//                    {
-//                        if (seciliKoltukBtn != null)
-//                            seciliKoltukBtn.BackColor = Color.LightGray;
-
-//                        seciliKoltukBtn = (Button)s;
-//                        seciliKoltukBtn.BackColor = Color.Green;
-//                        seciliKoltuk = (Koltuk)seciliKoltukBtn.Tag;
-//                    };
-
-//                    panel.Controls.Add(btn);
-//                }
-
-//                var odemeBtn = new Guna2Button()
-//                {
-//                    Text = "Ödemeye Geç",
-//                    Size = new Size(200, 45),
-//                    Location = new Point((this.Width - 200) / 2, this.Height - 100),
-//                    Anchor = AnchorStyles.Bottom,
-//                    FillColor = Color.SeaGreen,
-//                    ForeColor = Color.White,
-//                    BorderRadius = 8
-//                };
-
-//                odemeBtn.Click += (s, e) =>
-//                {
-//                    if (seciliKoltuk == null)
-//                    {
-//                        MessageBox.Show("Lütfen bir koltuk seçin.");
-//                        return;
-//                    }
-
-//                    OdemeForm odeme = new OdemeForm(etkinlikAdi, kullaniciEposta, seciliKoltuk.KoltukID);
-//                    odeme.ShowDialog();
-//                    this.Close();
-//                };
-
-//                panel.Controls.Add(odemeBtn);
-//            }
-//        }
-//    }
-//}
-

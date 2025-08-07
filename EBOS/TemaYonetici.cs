@@ -6,22 +6,6 @@ using System.Windows.Forms;
 public static class TemaYonetici
 {
     public static string AktifTema { get; set; } = "Yesil";
-
-    public static Color TemaButonRenk()
-    {
-        return AktifTema switch
-        {
-            "Lacivert" => Color.FromArgb(30, 75, 200),
-            "Koyu" => Color.FromArgb(80, 80, 80),
-            _ => Color.FromArgb(90, 115, 47) // Yeşil
-        };
-    }
-
-    public static Color TemaButonYaziRenk()
-    {
-        return Color.White;
-    }
-
     public static Color SeciliButonRengi()
     {
         return AktifTema switch
@@ -31,7 +15,6 @@ public static class TemaYonetici
             _ => Color.FromArgb(120, 160, 60) // Yeşil tema için
         };
     }
-
     public static Color HoverRenk()
     {
         switch (AktifTema)
@@ -45,8 +28,7 @@ public static class TemaYonetici
     public static void Uygula(Form form)
     {
         if (form is null) return;
-
-        Color topColor, leftColor, backColor, butonRenk, butonYaziRenk;
+        Color topColor, leftColor, backColor;
 
         switch (AktifTema)
         {
@@ -64,9 +46,6 @@ public static class TemaYonetici
                 break;
         }
 
-        butonRenk = TemaButonRenk();
-        butonYaziRenk = TemaButonYaziRenk();
-
         form.BackColor = backColor;
 
         foreach (Control control in form.Controls)
@@ -79,23 +58,8 @@ public static class TemaYonetici
                     panel.FillColor = leftColor;
             }
 
-            if (control is Guna2Button button)
-            {
-                button.FillColor = butonRenk;
-                button.ForeColor = butonYaziRenk;
-            }
-
-            foreach (Control inner in control.Controls)
-            {
-                if (inner is Guna2Button innerBtn)
-                {
-                    innerBtn.FillColor = butonRenk;
-                    innerBtn.ForeColor = butonYaziRenk;
-                }
-            }
         }
     }
-
     public static void ContextMenuRenkleriUygula(ContextMenuStrip menu)
     {
         if (menu == null) return;
@@ -108,9 +72,8 @@ public static class TemaYonetici
         };
 
         menu.ForeColor = Color.White;
-        menu.Renderer = new CustomColorRenderer(); // özel renderer uygulanıyor
+        menu.Renderer = new CustomColorRenderer();
     }
-
     public static Color ContextMenuHoverRenk()
     {
         return AktifTema switch
@@ -122,24 +85,3 @@ public static class TemaYonetici
     }
 }
 
-// ✅ EKLENMESİ GEREKEN SINIF
-public class CustomColorRenderer : ToolStripProfessionalRenderer
-{
-    protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
-    {
-        Color hoverColor = TemaYonetici.ContextMenuHoverRenk();
-
-        if (e.Item.Selected)
-        {
-            Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
-            using (SolidBrush brush = new SolidBrush(hoverColor))
-            {
-                e.Graphics.FillRectangle(brush, rect);
-            }
-        }
-        else
-        {
-            base.OnRenderMenuItemBackground(e);
-        }
-    }
-}

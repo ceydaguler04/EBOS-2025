@@ -18,6 +18,7 @@ namespace EBOS.DataAccess
         public DbSet<Sehir> Sehirler { get; set; }
         public DbSet<Ilce> Ilceler { get; set; }
         public DbSet<Yorum> Yorumlar { get; set; }
+        public DbSet<Mekan> Mekanlar { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
