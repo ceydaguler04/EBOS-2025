@@ -150,7 +150,7 @@ namespace EBOS
                         this.Boylam = lng;
 
                         // 🔐 Google Geocoding API
-                        string apiKey = "AIzaSyCnqoZXdyD1aRFguO1-_P3qhEFkHQHYz5k";
+                        string apiKey = "AIzaSyA5OXT7GB-HwL-bf8SHIZOE23hTtDfgBXU";
                         string requestUrl = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat.ToString(CultureInfo.InvariantCulture)},{lng.ToString(CultureInfo.InvariantCulture)}&key={apiKey}";
 
                         string adres = "";
