@@ -16,7 +16,7 @@ namespace EBOS
             ApplicationConfiguration.Initialize();
             //Application.Run(new YoneticiPaneli("gulerceyda04@gmail.com"));
             Application.Run(new GirisForm());
-
+            //Application.Run(new EtkinlikEkleForm());
         }
     }
 }

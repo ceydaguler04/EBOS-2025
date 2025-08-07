@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FontAwesome.Sharp;
 using EBOS;
+using EBOS.DataAccess;
 
 namespace EBOS
 {
@@ -22,7 +23,11 @@ namespace EBOS
         private Panel mainContentPanel;
         private ContextMenuStrip contextMenu;
 
-        public OrganisatorPaneli(string eposta, string kullaniciAdi = "Organizatör")
+        private string girisYapanEposta;
+        private string girisYapanAdSoyad;
+        private int? aktifKullaniciId;
+
+        public OrganisatorPaneli(string eposta)
         {
             InitializeComponent();
             this.Text = "Organizatör Paneli";
@@ -32,6 +37,20 @@ namespace EBOS
             this.MaximizeBox = false;
             this.BackColor = Color.WhiteSmoke;
 
+            //////////////////
+            girisYapanEposta = eposta;
+
+            using (var db = new AppDbContext())
+            {
+                var kullanici = db.Kullanicilar.FirstOrDefault(k => k.Eposta.ToLower() == eposta.ToLower());
+
+                if (kullanici != null)
+                {
+                    girisYapanAdSoyad = kullanici.AdSoyad;
+                    aktifKullaniciId = kullanici.KullaniciID;  // ? işte bu satır eksikti
+                }
+            }
+            ////////
             topPanel = new Guna2Panel()
             {
                 Size = new Size(this.Width, 60),
@@ -54,7 +73,7 @@ namespace EBOS
 
             lblKullaniciAd = new Label()
             {
-                Text = kullaniciAdi,
+                Text = girisYapanAdSoyad,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
@@ -115,7 +134,7 @@ namespace EBOS
             {
                 SetActiveButton(btnEtkinlikler);
                 mainContentPanel.Controls.Clear();
-                EtkinliklerKontrol etkinliklerKontrol = new EtkinliklerKontrol();
+                var etkinliklerKontrol = new EtkinliklerKontrol(aktifKullaniciId/*, "organisator"*/);
                 etkinliklerKontrol.Dock = DockStyle.Fill;
                 mainContentPanel.Controls.Add(etkinliklerKontrol);
             };
@@ -135,7 +154,7 @@ namespace EBOS
             {
                 SetActiveButton(btnAyarlar);
                 mainContentPanel.Controls.Clear();
-                AyarlarKontroll ayarlar = new AyarlarKontroll("ceyda@example.com");
+                AyarlarKontroll ayarlar = new AyarlarKontroll(girisYapanEposta);
                 mainContentPanel.Controls.Add(ayarlar);
             };
 
