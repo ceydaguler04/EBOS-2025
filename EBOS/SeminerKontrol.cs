@@ -161,7 +161,7 @@ namespace EBOS
                 ForeColor = Color.White,
                 BorderRadius = 5
             };
-            btnBilet.Click += (_, __) => new BiletAlForm(etkinlik.EtkinlikAdi, kullaniciEposta).ShowDialog();
+            btnBilet.Click += (_, __) => new BiletAlForm(etkinlik.EtkinlikID, etkinlik.EtkinlikAdi, kullaniciEposta).ShowDialog();
             kart.Controls.Add(btnBilet);
 
             var btnPuan = new Guna2Button

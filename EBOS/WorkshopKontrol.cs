@@ -166,7 +166,7 @@ namespace EBOS
                 ForeColor = Color.White,
                 BorderRadius = 5
             };
-            btnBilet.Click += (s, e) => new BiletAlForm(etkinlik.EtkinlikAdi, kullaniciEposta).ShowDialog();
+            btnBilet.Click += (s, e) => new BiletAlForm(etkinlik.EtkinlikID, etkinlik.EtkinlikAdi, kullaniciEposta).ShowDialog();
             kart.Controls.Add(btnBilet);
 
             // Değerlendirme butonu

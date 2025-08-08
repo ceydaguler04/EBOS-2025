@@ -37,6 +37,8 @@ namespace EBOS.Entities
         public DateTime SatinAlmaTarihi { get; set; }
 
         public bool AktifMi { get; set; } = true; // Varsayılan olarak aktif
-
+        public int EtkinlikID { get; set; }
+        [ForeignKey(nameof(EtkinlikID))]
+        public virtual Etkinlik Etkinlik{ get; set; }
     }
 }

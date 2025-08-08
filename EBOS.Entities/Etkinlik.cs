@@ -26,7 +26,7 @@ namespace EBOS.Entities
         [ForeignKey("TurID")]
         public EtkinlikTuru EtkinlikTuru { get; set; } = null!;
 
-        [MaxLength(500)]  // veya daha yüksek
+        [Column(TypeName= "TEXT")]  // veya daha yüksek
         public string GorselYolu { get; set; }
 
 

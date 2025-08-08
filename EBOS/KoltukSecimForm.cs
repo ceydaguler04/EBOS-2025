@@ -19,23 +19,29 @@ namespace EBOS
         private readonly int seansId;
         private readonly string kullaniciEposta;
         private readonly string etkinlikAdi;
+        private readonly int etkinlikId;
 
         private TableLayoutPanel salonPanel;
         private Button seciliBtn;
         private Koltuk seciliKoltuk;
 
-        public KoltukSecimForm(int seansId, string etkinlikAdi, string eposta)
+        public KoltukSecimForm(int etkinlikId, int seansId, string etkinlikAdi, string eposta)
         {
+            System.Diagnostics.Debug.WriteLine("📌 KoltukSecimForm açıldı! Stack Trace:");
+            System.Diagnostics.Debug.WriteLine(Environment.StackTrace);
 
-
+            this.etkinlikId = etkinlikId;
             this.seansId = seansId;
             this.etkinlikAdi = etkinlikAdi;
             this.kullaniciEposta = eposta;
+
             InitializeComponent();
             InitLayout();
             OlusturLegend();
-            KoltuklariYukle();
+
+            this.Load += KoltukSecimForm_Load;
         }
+
 
         private void InitLayout()
         {
@@ -127,22 +133,23 @@ namespace EBOS
 
         private void KoltuklariYukle()
         {
+            seciliBtn = null;           // ✅ Eski seçim sıfırla
+            seciliKoltuk = null;
             using var db = new AppDbContext();
 
-            var doluKoltuklar = db.Biletler
-                                  .Where(b => b.SeansID == seansId)
-                                  .Select(b => b.KoltukID)
-                                  .ToHashSet();
-
+            var doluKoltuklar = db.Biletler.Where(b => b.EtkinlikID == etkinlikId).Select(b => b.KoltukID).ToList();
+            var doluSet = new HashSet<int>(doluKoltuklar);
             var koltuklar = db.Koltuklar
                               .OrderBy(k => k.Satir)
                               .ThenBy(k => k.Sutun)
                               .ToList();
-
+            salonPanel.SuspendLayout();
             salonPanel.Controls.Clear();
 
             foreach (var k in koltuklar)
             {
+                bool dolu = doluSet.Contains(k.KoltukID);
+
                 var btn = new Button
                 {
                     Text = k.KoltukNo,
@@ -165,6 +172,7 @@ namespace EBOS
                 if (row < salonPanel.RowCount && col < salonPanel.ColumnCount)
                     salonPanel.Controls.Add(btn, col, row);
             }
+            salonPanel.ResumeLayout();
         }
 
         private void Koltuk_Click(object sender, EventArgs e)
@@ -194,15 +202,19 @@ namespace EBOS
 
             if (sonuc == DialogResult.Yes)
             {
-
-
-                using var odeme = new OdemeForm(etkinlikAdi, kullaniciEposta, seciliKoltuk.KoltukID);
-                odeme.ShowDialog();
-
-                this.Close();
-
-
+                using (var odeme = new OdemeForm(etkinlikId, etkinlikAdi, kullaniciEposta, secilenKoltuk.KoltukID))
+                {
+                    if (odeme.ShowDialog() == DialogResult.OK)
+                    {
+                        this.DialogResult = DialogResult.OK;
+                        this.Close();
+                    }
+                }
             }
+        }
+        private void KoltukSecimForm_Load(object sender, EventArgs e)
+        {
+            KoltuklariYukle();
         }
     }
 }
