@@ -60,7 +60,6 @@ public static class TemaYonetici
 
         }
     }
-
     public static void ContextMenuRenkleriUygula(ContextMenuStrip menu)
     {
         if (menu == null) return;
@@ -73,7 +72,7 @@ public static class TemaYonetici
         };
 
         menu.ForeColor = Color.White;
-        menu.Renderer = new CustomColorRenderer(); // varsa özel renderer'ı da yeniden uygula
+        menu.Renderer = new CustomColorRenderer();
     }
     public static Color ContextMenuHoverRenk()
     {
@@ -85,3 +84,4 @@ public static class TemaYonetici
         };
     }
 }
+

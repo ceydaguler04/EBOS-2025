@@ -110,6 +110,16 @@ namespace EBOS
                 Width = width,
                 Font = new Font("Segoe UI", 10)
             };
+            cmbSaat.Items.AddRange(new string[] { "18:00", "19:00", "20:00", "21:00", "22:00" });
+            cmbSaat.SelectedIndex = 0;
+
+            cmbKategori = new Guna2ComboBox()
+            {
+                Location = new Point(left, top + 310),
+                Width = width,
+                Font = new Font("Segoe UI", 10),
+                //PlaceholderText = "Etkinlik türü seçin"
+            };
             cmbKategori.Items.Insert(0, "-- Tür Seçiniz --");
             cmbKategori.Items.AddRange(new string[] { "Konser", "Sinema", "Tiyatro", "Workshop", "Seminer" });
             cmbKategori.SelectedIndex = 0;
@@ -144,6 +154,7 @@ namespace EBOS
                 Height = 35,
                 Visible = false
             };
+            btnGorselEkle.Click += BtnGorselEkle_Click;
 
             picGorsel = new PictureBox()
             {
@@ -215,6 +226,8 @@ namespace EBOS
         {
             if (!rbDosyadanEkle.Checked) return;
 
+        private void BtnGorselEkle_Click(object sender, EventArgs e)
+        {
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = "Resim Dosyası|*.jpg;*.jpeg;*.png;";
@@ -315,22 +328,22 @@ namespace EBOS
                 }
                 else
                 {
-                    var etkinlik = new Etkinlik()
-                    {
-                        EtkinlikAdi = txtAd.Text,
-                        Aciklama = txtAciklama.Text,
-                        SureDakika = int.Parse(txtSure.Text),
-                        Tarih = dtpTarih.Value,
-                        Saat = TimeSpan.Parse(cmbSaat.SelectedItem.ToString()),
-                        TurID = KategoriToTurID(cmbKategori.SelectedItem.ToString()),
+                var etkinlik = new Etkinlik()
+                {
+                    EtkinlikAdi = txtAd.Text,
+                    Aciklama = txtAciklama.Text,
+                    SureDakika = int.Parse(txtSure.Text),
+                    Tarih = dtpTarih.Value,
+                    Saat = TimeSpan.Parse(cmbSaat.SelectedItem.ToString()),
+                    TurID = KategoriToTurID(cmbKategori.SelectedItem.ToString()),
                         KullaniciID = aktifKullaniciId ?? 2,
                         GorselYolu = rbDosyadanEkle.Checked ? secilenGorselYolu : txtGorselYolu.Text.Trim(),
                         MekanID = secilenMekanID.Value,
                         IlceID = db.Mekanlar.FirstOrDefault(x => x.MekanID == secilenMekanID)?.IlceID
-                    };
+                };
 
-                    db.Etkinlikler.Add(etkinlik);
-                    db.SaveChanges();
+                db.Etkinlikler.Add(etkinlik);
+                db.SaveChanges();
                     MessageBox.Show("✅ Etkinlik başarıyla eklendi!");
                 }
 

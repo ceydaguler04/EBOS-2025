@@ -17,6 +17,7 @@ namespace EBOS.DataAccess
         public DbSet<Rapor> Raporlar { get; set; }
         public DbSet<Sehir> Sehirler { get; set; }
         public DbSet<Ilce> Ilceler { get; set; }
+        public DbSet<Yorum> Yorumlar { get; set; }
         public DbSet<Mekan> Mekanlar { get; set; }
 
 

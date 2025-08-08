@@ -146,44 +146,53 @@ namespace EBOS
                 return;
             }
 
-            using (var db = new AppDbContext())
+            try
             {
-                var kullanici = db.Kullanicilar.FirstOrDefault(k => k.Eposta.ToLower() == eposta.ToLower());
+                using (var db = new AppDbContext())
+                {
+                    var kullanici = db.Kullanicilar.FirstOrDefault(k => k.Eposta.ToLower() == eposta.ToLower());
 
-                if (kullanici == null)
-                {
-                    MessageBox.Show("Kullanıcı bulunamadı.", "Hata");
-                    return;
-                }
+                    if (kullanici == null)
+                    {
+                        MessageBox.Show("Kullanıcı bulunamadı.", "Hata");
+                        return;
+                    }
 
-                if (kullanici.Sifre != sifre)
-                {
-                    MessageBox.Show("Şifre hatalı.", "Hata");
-                    return;
-                }
+                    if (kullanici.Sifre != sifre)
+                    {
+                        MessageBox.Show("Şifre hatalı.", "Hata");
+                        return;
+                    }
 
-                string rol = kullanici.Rol?.ToLowerInvariant();
+                    string rol = kullanici.Rol?.ToLowerInvariant();
 
-                if (rol == "yonetici" || rol == "yönetici")
-                {
-                    new YoneticiPaneli(kullanici.Eposta).Show();
-                }
-                else if (rol == "kullanici" || rol == "kullanıcı")
-                {
-                    new KullaniciPaneli(kullanici.Eposta).Show();
-                }
-                else if (rol == "organisator" || rol == "organizatör")
-                {
-                    new OrganisatorPaneli(kullanici.Eposta).Show();
-                }
-                else
-                {
-                    MessageBox.Show("Tanımlı olmayan bir rol: " + rol, "Hata");
-                    return;
-                }
+                    if (rol == "yonetici" || rol == "yönetici")
+                    {
+                        new YoneticiPaneli(kullanici.Eposta).Show();
+                    }
+                    else if (rol == "kullanici" || rol == "kullanıcı")
+                    {
+                        new KullaniciPaneli(kullanici.Eposta).Show();
+                    }
+                    else if (rol == "organisator" || rol == "organizatör")
+                    {
+                        new OrganisatorPaneli(kullanici.Eposta).Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Tanımlı olmayan bir rol: " + rol, "Hata");
+                        return;
+                    }
 
-                this.Hide();
+                    this.Hide();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Giriş sırasında hata oluştu:\n" + ex.Message, "HATA", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
     }
 }

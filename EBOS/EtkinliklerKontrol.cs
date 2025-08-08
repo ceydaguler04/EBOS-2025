@@ -43,7 +43,7 @@ namespace EBOS
             this.rol = rol.ToLower();
 
             this.Dock = DockStyle.Fill;
-            
+
             ArayuzOlustur();
             this.Load += async (s, e) => await EtkinlikKartlariniOlustur();
         }
@@ -107,7 +107,7 @@ namespace EBOS
                 btnApiVeriGetir.Click += BtnApiVeriGetir_Click;
                 this.Controls.Add(btnApiVeriGetir);
             }
-            
+
 
             flpKartlar = new FlowLayoutPanel()
             {
@@ -133,9 +133,9 @@ namespace EBOS
             using (var db = new AppDbContext())
             {
                 var query = db.Etkinlikler
-                              .Include(e => e.EtkinlikTuru)
+                    .Include(e => e.EtkinlikTuru)
                               .Include(e => e.Mekan)
-                              .OrderByDescending(e => e.Tarih)
+                    .OrderByDescending(e => e.Tarih)
                               .AsQueryable();
 
                 if ((rol == "organisator" || rol == "organizatör") && aktifKullaniciId != null)
@@ -222,12 +222,12 @@ namespace EBOS
 
                             var form = new HaritaForm(url);
                             form.ShowDialog();
-                        }
+                    }
                        
                         else
-                        {
+                    {
                             MessageBox.Show("Bu etkinlik için konum bilgisi yok.");
-                        }
+                    }
                     };
 
                     Guna2Button btnDuzenle = new Guna2Button() { Text = "Düzenle", Size = new Size(100, 30), FillColor = Color.DodgerBlue, ForeColor = Color.White, Location = new Point(10, 285) };
@@ -237,6 +237,12 @@ namespace EBOS
                     btnSil.Click += (s, e) => SilEtkinlik(etkinlik);
 
                     kart.Controls.Add(lblAd);
+
+                    Label lblTur = new Label();
+                    lblTur.Text = $"Tür: {etkinlik.EtkinlikTuru.TurAdi} | Süre: {etkinlik.SureDakika} dk";
+                    lblTur.Font = new Font("Segoe UI", 9);
+                    lblTur.Location = new Point(10, 200);
+                    lblTur.AutoSize = true;
                     kart.Controls.Add(lblTur);
                     kart.Controls.Add(lblKonum);
                     kart.Controls.Add(lblTarih);
@@ -265,7 +271,7 @@ namespace EBOS
                     flpKartlar.Controls.Add(yeniBtn);
                 }
             }
-        }
+            }
         private Guna2Panel OlusturSkeletonKart()
         {
             Guna2Panel skeleton = new Guna2Panel();
@@ -504,7 +510,7 @@ namespace EBOS
         {
             EtkinlikKartlariniOlustur(txtArama.Text);
         }
-       
+
         private async void EtkinliklerKontrol_Load(object sender, EventArgs e)
         {
             if (TemaYonetici.AktifTema == "Koyu")

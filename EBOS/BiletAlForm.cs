@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -10,154 +11,86 @@ namespace EBOS
 {
     public partial class BiletAlForm : Form
     {
-        private string kullaniciEposta;
-        private string kategori;
+        private readonly string _etkinlikAdi;
+        private readonly string _kullaniciEposta;
+        private List<Koltuk> _koltuklar;
+        private Guna2Panel _koltukPanel;
+        private Koltuk _seciliKoltuk;
 
-        private ComboBox cmbSeans;
-        private ComboBox cmbKoltuk;
-        private NumericUpDown nudAdet;
-        private CheckBox chkKampanya;
-        private Label lblFiyat;
-
-        public BiletAlForm(string kategori, string eposta)
+        public BiletAlForm(string etkinlikAdi, string kullaniciEposta)
         {
-            this.kategori = kategori;
-            this.kullaniciEposta = eposta;
+            _etkinlikAdi = etkinlikAdi;
+            _kullaniciEposta = kullaniciEposta;
 
-            this.Text = "Bilet Satın Al";
-            this.Size = new Size(500, 450);
+            InitializeComponent();
+            this.Text = "Koltuk Seçimi";
+            this.Size = new Size(800, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.BackColor = Color.White;
 
+            YukleKoltuklar();
             ArayuzOlustur();
-            SeanslariYukle();
-            KoltuklariYukle();
-            FiyatGuncelle();
+        }
+
+        private void YukleKoltuklar()
+        {
+            using (var db = new AppDbContext())
+            {
+                _koltuklar = db.Koltuklar.ToList();
+            }
         }
 
         private void ArayuzOlustur()
         {
-            Label lblSeans = new Label() { Text = "Seans Seç:", Location = new Point(30, 30), AutoSize = true };
-            cmbSeans = new ComboBox() { Location = new Point(150, 25), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
-
-            Label lblKoltuk = new Label() { Text = "Koltuk Seç:", Location = new Point(30, 80), AutoSize = true };
-            cmbKoltuk = new ComboBox() { Location = new Point(150, 75), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
-
-            Label lblAdet = new Label() { Text = "Bilet Adedi:", Location = new Point(30, 130), AutoSize = true };
-            nudAdet = new NumericUpDown() { Location = new Point(150, 125), Width = 60, Minimum = 1, Maximum = 10, Value = 1 };
-            nudAdet.ValueChanged += (s, e) => FiyatGuncelle();
-
-            chkKampanya = new CheckBox() { Text = "Kampanya Uygulansın", Location = new Point(150, 165), AutoSize = true };
-            chkKampanya.CheckedChanged += (s, e) => FiyatGuncelle();
-
-            Label lblFiyatLabel = new Label() { Text = "Toplam Fiyat:", Location = new Point(30, 210), AutoSize = true };
-            lblFiyat = new Label() { Text = "0 ₺", Location = new Point(150, 210), AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-
-            Guna2Button btnSatinAl = new Guna2Button()
+            _koltukPanel = new Guna2Panel()
             {
-                Text = "Satın Al",
-                Location = new Point(150, 270),
-                Size = new Size(150, 40),
-                FillColor = Color.Teal,
-                ForeColor = Color.White,
-                BorderRadius = 8
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20),
+                AutoScroll = true,
+                FillColor = Color.White
             };
-            btnSatinAl.Click += BtnSatinAl_Click;
+            this.Controls.Add(_koltukPanel);
 
-            this.Controls.AddRange(new Control[] {
-                lblSeans, cmbSeans,
-                lblKoltuk, cmbKoltuk,
-                lblAdet, nudAdet,
-                chkKampanya, lblFiyatLabel, lblFiyat,
-                btnSatinAl
-            });
-        }
+            int satir = 10;
+            int sutun = 10;
+            int koltukGenislik = 60;
+            int koltukYukseklik = 40;
+            int aralik = 10;
 
-        private void SeanslariYukle()
-        {
-            using (var db = new AppDbContext())
+            for (int i = 0; i < satir; i++)
             {
-                var seanslar = db.Seanslar
-                    .Where(s => s.Etkinlik.EtkinlikTuru.TurAdi == kategori)
-                    .ToList();
-
-                cmbSeans.DataSource = seanslar;
-                cmbSeans.DisplayMember = "SeansAdi";
-                cmbSeans.ValueMember = "SeansID";
-            }
-        }
-
-        private void KoltuklariYukle()
-        {
-            using (var db = new AppDbContext())
-            {
-                var koltuklar = db.Koltuklar.ToList();
-                cmbKoltuk.DataSource = koltuklar;
-                cmbKoltuk.DisplayMember = "KoltukNo";
-                cmbKoltuk.ValueMember = "KoltukID";
-            }
-        }
-
-        private void FiyatGuncelle()
-        {
-            decimal birimFiyat = chkKampanya.Checked ? 50 : 100;
-            decimal toplam = birimFiyat * nudAdet.Value;
-            lblFiyat.Text = $"{toplam:0.00} ₺";
-        }
-
-        private void BtnSatinAl_Click(object sender, EventArgs e)
-        {
-            if (cmbSeans.SelectedValue == null || cmbKoltuk.SelectedValue == null)
-            {
-                MessageBox.Show("Lütfen seans ve koltuk seçiniz.", "Uyarı");
-                return;
-            }
-
-            int seansID = Convert.ToInt32(cmbSeans.SelectedValue);
-            int koltukID = Convert.ToInt32(cmbKoltuk.SelectedValue);
-            int adet = (int)nudAdet.Value;
-            bool kampanya = chkKampanya.Checked;
-
-            decimal birimFiyat = kampanya ? 50 : 100;
-
-            using (var db = new AppDbContext())
-            {
-                var kullanici = db.Kullanicilar.FirstOrDefault(k => k.Eposta.ToLower() == kullaniciEposta.ToLower());
-                if (kullanici == null)
+                for (int j = 0; j < sutun; j++)
                 {
-                    MessageBox.Show("Kullanıcı bulunamadı.", "Hata");
-                    return;
-                }
+                    int index = i * sutun + j;
+                    if (index >= _koltuklar.Count) break;
 
-                bool koltukZatenAlinmis = db.Biletler.Any(b => b.SeansID == seansID && b.KoltukID == koltukID);
-                if (koltukZatenAlinmis)
-                {
-                    MessageBox.Show("Seçtiğiniz koltuk bu seans için zaten alınmış.", "Uyarı");
-                    return;
-                }
-
-                for (int i = 0; i < adet; i++)
-                {
-                    var bilet = new Bilet()
+                    var koltuk = _koltuklar[index];
+                    var btnKoltuk = new Guna2Button()
                     {
-                        KullaniciID = kullanici.KullaniciID,
-                        SeansID = seansID,
-                        KoltukID = koltukID,
-                        Fiyat = birimFiyat,
-                        KampanyaUygulandiMi = kampanya,
-                        SatinAlmaTarihi = DateTime.Now
+                        Text = koltuk.KoltukNo,
+                        Size = new Size(koltukGenislik, koltukYukseklik),
+                        Location = new Point(j * (koltukGenislik + aralik), i * (koltukYukseklik + aralik)),
+                        Tag = koltuk,
+                        BorderRadius = 5,
+                        FillColor = Color.LightGreen
                     };
-                    db.Biletler.Add(bilet);
+
+                    btnKoltuk.Click += (s, e) =>
+                    {
+                        _seciliKoltuk = (Koltuk)((Guna2Button)s).Tag;
+                        DialogResult sonuc = MessageBox.Show($"{_seciliKoltuk.KoltukNo} koltuğunu seçtiniz. Ödemeye geçilsin mi?", "Onay", MessageBoxButtons.YesNo);
+                        if (sonuc == DialogResult.Yes)
+                        {
+                            OdemeForm odeme = new OdemeForm(_etkinlikAdi, _kullaniciEposta, _seciliKoltuk.KoltukID);
+                            odeme.ShowDialog();
+                            this.Close();
+                        }
+                    };
+
+                    _koltukPanel.Controls.Add(btnKoltuk);
                 }
-
-                db.SaveChanges();
             }
-
-            MessageBox.Show("Bilet(ler) başarıyla satın alındı!", "Onay", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.DialogResult = DialogResult.OK;
-            this.Close();
         }
     }
 }
+
+

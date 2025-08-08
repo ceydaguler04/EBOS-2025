@@ -239,7 +239,7 @@ namespace EBOS
 
         private void SeanslarimKontrol_Load(object sender, EventArgs e)
         {
-            // sayfa yüklendiğinde yapılacak işlemler
+            
         }
     }
 }

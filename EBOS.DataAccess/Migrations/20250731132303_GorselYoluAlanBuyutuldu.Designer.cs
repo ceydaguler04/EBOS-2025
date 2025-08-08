@@ -4,6 +4,7 @@ using EBOS.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731132303_GorselYoluAlanBuyutuldu")]
+    partial class GorselYoluAlanBuyutuldu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +39,7 @@ namespace EBOS.DataAccess.Migrations
                     b.Property<bool>("KampanyaUygulandiMi")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("KoltukID")
+                    b.Property<int>("KoltukID")
                         .HasColumnType("int");
 
                     b.Property<int?>("KoltukID1")
@@ -130,6 +133,10 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<int?>("IlceID")
                         .HasColumnType("int");
+
+                    b.Property<string>("Kategori")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("KullaniciID")
                         .HasColumnType("int");
@@ -226,13 +233,6 @@ namespace EBOS.DataAccess.Migrations
                     b.Property<string>("KampanyaAdi")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<string>("KampanyaKodu")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal?>("MinTutar")
-                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("KampanyaID");
 
@@ -481,7 +481,8 @@ namespace EBOS.DataAccess.Migrations
                     b.HasOne("EBOS.Entities.Koltuk", "Koltuk")
                         .WithMany()
                         .HasForeignKey("KoltukID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("EBOS.Entities.Koltuk", null)
                         .WithMany("Biletler")

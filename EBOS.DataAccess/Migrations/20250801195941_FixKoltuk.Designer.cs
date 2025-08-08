@@ -4,6 +4,7 @@ using EBOS.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250801195941_FixKoltuk")]
+    partial class FixKoltuk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -226,13 +229,6 @@ namespace EBOS.DataAccess.Migrations
                     b.Property<string>("KampanyaAdi")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<string>("KampanyaKodu")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal?>("MinTutar")
-                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("KampanyaID");
 
