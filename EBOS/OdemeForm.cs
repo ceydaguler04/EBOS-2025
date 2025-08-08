@@ -18,25 +18,44 @@ namespace EBOS
 {
     public partial class OdemeForm : Form
     {
-        private readonly string _etkinlikAdi;
-        private readonly string _kullaniciEposta;
-        private readonly int _koltukID;
+        private readonly string etkinlikAdi;
+        private readonly string kullaniciEposta;
+        private readonly int koltukID;
+        private readonly int etkinlikId;
 
         private Guna2Panel anaPanel;
         private Label lblBaslik;
         private Guna2Button btnOdemeYap;
 
 
-            InitializeComponent();
-            this.Text = "İyzico Ödeme Simülasyonu";
-            this.Size = new Size(420, 450);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
 
-            ArayuzOlustur();
-        }
+        //public OdemeForm(int etkinlikId, string etkinlikAdi, string kullaniciEposta, int koltukID)
+        //{
+        //    InitializeComponent();
+        //    this.etkinlikId = etkinlikId;
+        //    this.etkinlikAdi = etkinlikAdi;
+        //    this.kullaniciEposta = kullaniciEposta;
+        //    this.koltukID = koltukID;
+        //    ArayuzOlustur();
+        //}
+
+          public OdemeForm(int etkinlikId,string etkinlikAdi, string kullaniciEposta, int koltukID)
+          {
+            this.etkinlikId = etkinlikId;
+            this.etkinlikAdi = etkinlikAdi;
+            this.kullaniciEposta = kullaniciEposta;
+            this.koltukID = koltukID;
+
+            InitializeComponent();
+              this.Text = "İyzico Ödeme Simülasyonu";
+              this.Size = new Size(420, 450);
+              this.StartPosition = FormStartPosition.CenterScreen;
+              this.FormBorderStyle = FormBorderStyle.FixedDialog;
+              this.MaximizeBox = false;
+              this.MinimizeBox = false;
+
+              ArayuzOlustur();
+          }
 
         private void ArayuzOlustur()
         {
@@ -146,7 +165,7 @@ namespace EBOS
                     Name = "Sibel",
                     Surname = "Yağmur",
                     GsmNumber = "+905350000000",
-                    Email = _kullaniciEposta,
+                    Email = kullaniciEposta,
                     IdentityNumber = "11111111111",
                     RegistrationAddress = "Akasya Mah. 1. Cad. No:2",
                     Ip = "85.34.78.112",
@@ -159,7 +178,7 @@ namespace EBOS
                     new BasketItem
                     {
                         Id = "BI101",
-                        Name = _etkinlikAdi,
+                        Name = etkinlikAdi,
                         Category1 = "Etkinlik",
                         ItemType = BasketItemType.PHYSICAL.ToString(),
                         Price = "100"
@@ -191,26 +210,40 @@ namespace EBOS
                 {
                     using (var db = new AppDbContext())
                     {
-                        var koltuk = db.Koltuklar.FirstOrDefault(k => k.KoltukID == _koltukID);
-                        int seansID = db.Seanslar.FirstOrDefault(s => s.SalonID == koltuk.SalonID)?.SeansID ?? 0;
-                        int kullaniciID = db.Kullanicilar.FirstOrDefault(k => k.Eposta == _kullaniciEposta)?.KullaniciID ?? 0;
+                        var koltuk = db.Koltuklar.FirstOrDefault(k => k.KoltukID == koltukID);
+
+                        // Etkinlik ID kullanılarak etkinlik bulunuyor
+                        var etkinlik = db.Etkinlikler.FirstOrDefault(e => e.EtkinlikID == etkinlikId);
+                        MessageBox.Show("Biletiniz başarıyla alındı.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        string etkinlikTuru = "Bilinmiyor";
+                        if (etkinlik != null)
+                        {
+                            etkinlikTuru = db.EtkinlikTurleri
+                                             .FirstOrDefault(t => t.TurID == etkinlik.TurID)?.TurAdi ?? "Bilinmiyor";
+                        }
+
+                        int kullaniciID = db.Kullanicilar
+                                            .FirstOrDefault(k => k.Eposta == kullaniciEposta)?.KullaniciID ?? 0;
 
                         var bilet = new Bilet
                         {
                             KullaniciID = kullaniciID,
-                            SeansID = seansID,
-                            KoltukID = _koltukID,
+                            SeansID = null,
+                            EtkinlikID = etkinlikId,
+                            KoltukID = koltukID,
                             SatinAlmaTarihi = DateTime.Now,
                             KampanyaUygulandiMi = false,
-                            Fiyat = 100
+                            Fiyat = 100m
                         };
 
                         db.Biletler.Add(bilet);
                         db.SaveChanges();
 
-                        QrVeEpostaGonder(_kullaniciEposta, $"Etkinlik: {_etkinlikAdi}\nKoltuk No: {_koltukID}\nTarih: {DateTime.Now.ToShortDateString()}");
+                        //QrVeEpostaGonder(kullaniciEposta, $"Etkinlik: {etkinlikAdi}\nKoltuk No: {koltukID}\nTarih: {DateTime.Now.ToShortDateString()}");
+                        QrVeEpostaGonder(kullaniciEposta, $"Etkinlik: {etkinlikAdi}\nTür: {etkinlikTuru}\nKoltuk No: {koltuk?.KoltukNo}\nTarih: {DateTime.Now.ToShortDateString()}");
 
-                        MessageBox.Show("Ödeme başarılı ve biletiniz kaydedildi!");
+                        MessageBox.Show("Biletiniz başarıyla alındı.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.DialogResult = DialogResult.OK; // ödeme başarılı bilgisini üst forma gönder
                         this.Close();
                     }
                 }

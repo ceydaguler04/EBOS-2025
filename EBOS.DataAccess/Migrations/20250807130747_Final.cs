@@ -5,7 +5,7 @@
 namespace EBOS.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class GorselYoluFix : Migration
+    public partial class Final : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

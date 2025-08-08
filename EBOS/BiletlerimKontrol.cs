@@ -111,29 +111,15 @@ namespace EBOS
 
             foreach (var (bilet, turAdi) in siraliListe)
             {
-                var seans = seanslar.FirstOrDefault(s => s.SeansID == bilet.SeansID);
-                var etkinlik = etkinlikler.FirstOrDefault(e => e.EtkinlikID == seans?.EtkinlikID);
-                var koltuk = koltuklar.FirstOrDefault(k => k.KoltukID == bilet.KoltukID);
-
-                //string etkinlikAdi = etkinlik?.EtkinlikAdi ?? "Etkinlik Yok";
-                //string tarih = seans?.Tarih.ToString("yyyy-MM-dd") ?? "Yok";
-                //string koltukNo = koltuk?.KoltukNo ?? "Yok";
-                //string fiyat = bilet.Fiyat.ToString("C2");
-                //string durum = (seans?.Tarih < DateTime.Today || !bilet.AktifMi) ? "Pasif" : "Aktif";
-
-                //int rowIndex = dgvBiletler.Rows.Add();
-                //dgvBiletler.Rows[rowIndex].Cells["Kategori"].Value = turAdi;
-                //dgvBiletler.Rows[rowIndex].Cells["EtkinlikAdi"].Value = etkinlikAdi;
-                //dgvBiletler.Rows[rowIndex].Cells["Tarih"].Value = tarih;
-                //dgvBiletler.Rows[rowIndex].Cells["Koltuk"].Value = koltukNo;
-                //dgvBiletler.Rows[rowIndex].Cells["Fiyat"].Value = fiyat;
-                //dgvBiletler.Rows[rowIndex].Cells["Durum"].Value = durum;
-                //dgvBiletler.Rows[rowIndex].Cells["BiletID"].Value = bilet.BiletID;
+                var etkinlik = etkinlikler.FirstOrDefault(e => e.EtkinlikID == bilet.EtkinlikID);
+                var tur = turler.FirstOrDefault(t => t.TurID == etkinlik?.TurID);
+                var koltuk = koltuklar.FirstOrDefault(k => k.KoltukID == bilet.KoltukID); // EKLENDİ
                 string etkinlikAdi = etkinlik?.EtkinlikAdi ?? "Etkinlik Yok";
-                string tarih = seans?.Tarih.ToString("yyyy-MM-dd") ?? "Yok";
+                string tarih = etkinlik?.Tarih.ToString("yyyy-MM-dd") ?? "Yok";
                 string koltukNo = koltuk?.KoltukNo ?? "Yok";
-                string fiyat = bilet.Fiyat.ToString("C2");
-                string durum = (seans?.Tarih < DateTime.Today || !bilet.AktifMi) ? "Pasif" : "Aktif";
+                string fiyat = bilet.Fiyat.ToString("c2");
+                string durum = (!bilet.AktifMi || etkinlik?.Tarih < DateTime.Today) ? "Pasif" : "Aktif";
+
 
                 int rowIndex = dgvBiletler.Rows.Add();
                 dgvBiletler.Rows[rowIndex].Cells["Kategori"].Value = turAdi;

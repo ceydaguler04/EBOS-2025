@@ -20,7 +20,6 @@ namespace EBOS
             this.StartPosition = FormStartPosition.CenterScreen;
             this.ClientSize = new Size(430, 400);
             this.Opacity = 0;
-            this.Load += FadeIn;
 
             ArayuzOlustur();
         }

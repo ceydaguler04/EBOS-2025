@@ -30,46 +30,39 @@ namespace EBOS.DataAccess.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BiletID"));
 
+                    b.Property<bool>("AktifMi")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("EtkinlikID")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Fiyat")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<bool>("KampanyaUygulandiMi")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("KoltukID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("KoltukID1")
+                    b.Property<int>("KoltukID")
                         .HasColumnType("int");
 
                     b.Property<int>("KullaniciID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("KullaniciID1")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("SatinAlmaTarihi")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("SeansID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SeansID1")
+                    b.Property<int?>("SeansID")
                         .HasColumnType("int");
 
                     b.HasKey("BiletID");
 
-                    b.HasIndex("KoltukID");
+                    b.HasIndex("EtkinlikID");
 
-                    b.HasIndex("KoltukID1");
+                    b.HasIndex("KoltukID");
 
                     b.HasIndex("KullaniciID");
 
-                    b.HasIndex("KullaniciID1");
-
                     b.HasIndex("SeansID");
-
-                    b.HasIndex("SeansID1");
 
                     b.ToTable("Biletler");
                 });
@@ -471,34 +464,29 @@ namespace EBOS.DataAccess.Migrations
 
             modelBuilder.Entity("EBOS.Entities.Bilet", b =>
                 {
-                    b.HasOne("EBOS.Entities.Koltuk", "Koltuk")
+                    b.HasOne("EBOS.Entities.Etkinlik", "Etkinlik")
                         .WithMany()
-                        .HasForeignKey("KoltukID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("EtkinlikID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("EBOS.Entities.Koltuk", null)
+                    b.HasOne("EBOS.Entities.Koltuk", "Koltuk")
                         .WithMany("Biletler")
-                        .HasForeignKey("KoltukID1");
+                        .HasForeignKey("KoltukID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
-                        .WithMany()
-                        .HasForeignKey("KullaniciID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EBOS.Entities.Kullanici", null)
                         .WithMany("Biletler")
-                        .HasForeignKey("KullaniciID1");
+                        .HasForeignKey("KullaniciID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("EBOS.Entities.Seans", "Seans")
-                        .WithMany()
-                        .HasForeignKey("SeansID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EBOS.Entities.Seans", null)
                         .WithMany("Biletler")
-                        .HasForeignKey("SeansID1");
+                        .HasForeignKey("SeansID");
+
+                    b.Navigation("Etkinlik");
 
                     b.Navigation("Koltuk");
 

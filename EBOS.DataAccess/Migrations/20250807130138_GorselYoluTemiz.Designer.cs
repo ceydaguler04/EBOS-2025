@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBOS.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250729112210_AciklamaTipiniTextYap")]
-    partial class AciklamaTipiniTextYap
+    [Migration("20250807130138_GorselYoluTemiz")]
+    partial class GorselYoluTemiz
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,12 @@ namespace EBOS.DataAccess.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BiletID"));
 
+                    b.Property<bool>("AktifMi")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("EtkinlikID")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Fiyat")
                         .HasColumnType("decimal(65,30)");
 
@@ -48,10 +54,12 @@ namespace EBOS.DataAccess.Migrations
                     b.Property<DateTime>("SatinAlmaTarihi")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("SeansID")
+                    b.Property<int?>("SeansID")
                         .HasColumnType("int");
 
                     b.HasKey("BiletID");
+
+                    b.HasIndex("EtkinlikID");
 
                     b.HasIndex("KoltukID");
 
@@ -109,23 +117,20 @@ namespace EBOS.DataAccess.Migrations
 
                     b.Property<string>("EtkinlikAdi")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("GorselYolu")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<int?>("IlceID")
+                    b.Property<string>("GorselYolu")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("IlceID")
                         .HasColumnType("int");
 
                     b.Property<int>("KullaniciID")
                         .HasColumnType("int");
 
                     b.Property<int?>("MekanID")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<TimeSpan>("Saat")
@@ -248,7 +253,7 @@ namespace EBOS.DataAccess.Migrations
 
                     b.HasIndex("SalonID");
 
-                    b.ToTable("Koltuklar");
+                    b.ToTable("koltuklar");
                 });
 
             modelBuilder.Entity("EBOS.Entities.Kullanici", b =>
@@ -313,6 +318,9 @@ namespace EBOS.DataAccess.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<int>("IlceID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MekanApiId")
                         .HasColumnType("int");
 
                     b.Property<string>("Sehir")
@@ -428,8 +436,43 @@ namespace EBOS.DataAccess.Migrations
                     b.ToTable("Sehirler");
                 });
 
+            modelBuilder.Entity("EBOS.Entities.Yorum", b =>
+                {
+                    b.Property<int>("YorumID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("YorumID"));
+
+                    b.Property<string>("EtkinlikAdi")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Icerik")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("KullaniciID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Tarih")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("YorumID");
+
+                    b.HasIndex("KullaniciID");
+
+                    b.ToTable("Yorumlar");
+                });
+
             modelBuilder.Entity("EBOS.Entities.Bilet", b =>
                 {
+                    b.HasOne("EBOS.Entities.Etkinlik", "Etkinlik")
+                        .WithMany()
+                        .HasForeignKey("EtkinlikID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EBOS.Entities.Koltuk", "Koltuk")
                         .WithMany("Biletler")
                         .HasForeignKey("KoltukID")
@@ -444,9 +487,9 @@ namespace EBOS.DataAccess.Migrations
 
                     b.HasOne("EBOS.Entities.Seans", "Seans")
                         .WithMany("Biletler")
-                        .HasForeignKey("SeansID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SeansID");
+
+                    b.Navigation("Etkinlik");
 
                     b.Navigation("Koltuk");
 
@@ -478,9 +521,7 @@ namespace EBOS.DataAccess.Migrations
                 {
                     b.HasOne("EBOS.Entities.Ilce", "Ilce")
                         .WithMany("Etkinlikler")
-                        .HasForeignKey("IlceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("IlceID");
 
                     b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
                         .WithMany("Etkinlikler")
@@ -490,9 +531,7 @@ namespace EBOS.DataAccess.Migrations
 
                     b.HasOne("EBOS.Entities.Mekan", "Mekan")
                         .WithMany("Etkinlikler")
-                        .HasForeignKey("MekanID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MekanID");
 
                     b.HasOne("EBOS.Entities.EtkinlikTuru", "EtkinlikTuru")
                         .WithMany("Etkinlikler")
@@ -548,6 +587,17 @@ namespace EBOS.DataAccess.Migrations
                     b.Navigation("Etkinlik");
 
                     b.Navigation("Salon");
+                });
+
+            modelBuilder.Entity("EBOS.Entities.Yorum", b =>
+                {
+                    b.HasOne("EBOS.Entities.Kullanici", "Kullanici")
+                        .WithMany()
+                        .HasForeignKey("KullaniciID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kullanici");
                 });
 
             modelBuilder.Entity("EBOS.Entities.Etkinlik", b =>
