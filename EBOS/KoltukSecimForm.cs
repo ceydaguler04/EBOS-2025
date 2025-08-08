@@ -204,9 +204,5 @@ namespace EBOS
 
             }
         }
-        private void KoltukSecimForm_Load(object sender, EventArgs e)
-        {
-            KoltuklariYukle();
-        }
     }
 }
